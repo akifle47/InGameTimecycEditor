@@ -1,4 +1,4 @@
-an in game timecycle editor for GTA IV
+an in-game timecycle editor for GTA IV
 
 ![screenshot.png](https://i.postimg.cc/CLGWNF5Y/screenshot.png)
 
