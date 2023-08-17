@@ -18,6 +18,17 @@ void TimecycEditor::Initialize(const uint8_t *baseAddress)
 			SET_TIME_ONE_DAY_BACK = (SET_TIME_ONE_DAY_BACKT*)(baseAddress + 0x5CB0D0);
 		break;
 
+		case 1070:
+			mTimeCycle = (Timecycle*)(baseAddress + 0xDF6080);
+			mHour = (int32_t*)(baseAddress + 0xDD5300);
+			mMinutes = (int32_t*)(baseAddress + 0xDD52FC);
+			mTimerLength = (uint32_t*)(baseAddress + 0xDD5304);
+			FORCE_WEATHER_NOW = (FORCE_WEATHER_NOWT*)(baseAddress + 0x5E41D0);
+			RELEASE_WEATHER = (RELEASE_WEATHERT*)(baseAddress + 0x5E4240);
+			SET_TIME_ONE_DAY_FORWARD = (SET_TIME_ONE_DAY_FORWARDT*)(baseAddress + 0x765060);
+			SET_TIME_ONE_DAY_BACK = (SET_TIME_ONE_DAY_BACKT*)(baseAddress + 0x7650A0);
+		break;
+
 		case 1080:
 			mTimeCycle = (Timecycle*)(baseAddress + 0xFF1150);
 			mHour = (int32_t*)(baseAddress + 0xD51694);

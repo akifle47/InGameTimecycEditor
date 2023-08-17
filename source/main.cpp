@@ -219,7 +219,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 		if(!Utils::GetGameVersion(gameVersion))
 		{
-			logStream << "In Game Timecyc Editor only supports patch 4 and 8 - " << std::to_string(gameVersion);
+			logStream << "In Game Timecyc Editor only supports patch 4, 7 and 8 - " << std::to_string(gameVersion);
 			Log::Error(logStream.str());
 
 			return false;
