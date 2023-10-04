@@ -370,7 +370,7 @@ void TimecycEditor::DrawMainWindow()
 	const char *weatherNames[NUM_WEATHERS - 1] = {"EXTRASUNNY", "SUNNY", "SUNNY_WINDY", "CLOUDY", "RAIN", "DRIZZLE", "FOGGY", "LIGHTNING"};
 	const char *weatherName = weatherNames[mSelectedWeather];
 
-	ImGui::Begin("Timecyc Editor 1.1", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin("Timecyc Editor 1.2", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 	ImGui::SetWindowPos(mWindowPos);
 	ImGui::SetWindowSize(mWindowSize);
 
