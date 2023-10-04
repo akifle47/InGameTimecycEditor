@@ -52,6 +52,11 @@ namespace Utils
                                     gameVersion = 1080;
                                     return true;
                                 break;
+                                
+								case 0x0102003b:
+									gameVersion = 1200;
+									return true;
+								break;
 
                                 default:
                                     gameVersion = version;
@@ -131,6 +136,19 @@ namespace Utils
 
             case 1080:
                 d3d9Device = (IDirect3DDevice9*)(baseAddress + 0x1345630);
+
+                if(*(int32_t*)d3d9Device == NULL)
+                {
+                    return false;
+                }
+
+                memcpy(vtable, **(void***)d3d9Device, 119 * 4);
+
+                return true;
+            break;
+
+            case 1200:
+                d3d9Device = (IDirect3DDevice9*)(baseAddress + 0x13ED8D8);
 
                 if(*(int32_t*)d3d9Device == NULL)
                 {
