@@ -53,10 +53,10 @@ namespace Utils
                                     return true;
                                 break;
                                 
-								case 0x0102003b:
-									gameVersion = 1200;
-									return true;
-								break;
+                                case 0x0102003b:
+                                    gameVersion = 1200;
+                                    return true;
+                                break;
 
                                 default:
                                     gameVersion = version;
