@@ -42,8 +42,8 @@ void TimecycEditor::Initialize(const uint8_t *baseAddress)
 
 		case 1200:
 			mTimeCycle = (Timecycle*)(baseAddress + 0x11E8D30);
-			mHour = (int32_t*)(baseAddress + 0xE95854);
-			mMinutes = (int32_t*)(baseAddress + 0xE95850);
+			mHour = (int32_t*)(baseAddress + 0xE95848);
+			mMinutes = (int32_t*)(baseAddress + 0xE9584C);
 			mTimerLength = (uint32_t*)(baseAddress + 0xE95840);
 			FORCE_WEATHER_NOW = (FORCE_WEATHER_NOWT*)(baseAddress + 0x62E640);
 			RELEASE_WEATHER = (RELEASE_WEATHERT*)(baseAddress + 0x62E9E0);
@@ -370,7 +370,7 @@ void TimecycEditor::DrawMainWindow()
 	const char *weatherNames[NUM_WEATHERS - 1] = {"EXTRASUNNY", "SUNNY", "SUNNY_WINDY", "CLOUDY", "RAIN", "DRIZZLE", "FOGGY", "LIGHTNING"};
 	const char *weatherName = weatherNames[mSelectedWeather];
 
-	ImGui::Begin("Timecyc Editor 1.2", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin("Timecyc Editor 1.21", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 	ImGui::SetWindowPos(mWindowPos);
 	ImGui::SetWindowSize(mWindowSize);
 
