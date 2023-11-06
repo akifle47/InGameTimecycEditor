@@ -5,7 +5,7 @@
 const uint32_t NUM_HOURS = 11;
 const uint32_t NUM_WEATHERS = 9;
 
-class TimeCycleParams
+struct TimeCycleParams
 {
 public:
 	//unknown means its a timecyc.dat parameter and i dont know what it does
@@ -35,7 +35,7 @@ public:
 	uint32_t mLowCloudsColor;
 	uint32_t mBottomCloudsColor;
 	uint32_t mWater;
-	float mUnused1[7];
+	float mUnused64[7];
 	float mWaterReflectionMultiplier;
 	float mParticleBrightness;
 	float mExposure;
@@ -56,24 +56,24 @@ public:
 	float mLumMax;
 	float mLumDelay;
 	int32_t mCloudAlpha;
-	float mUnused2;
+	float mUnusedD0;
 	float mTemperature;
 	float mGlobalReflectionMultiplier;
-	float mUnused3;
+	float mUnusedDC;
 	float mSkyColor[3];
-	float mUnused4;
+	float mUnusedEC;
 	float mSkyHorizonColor[3];
-	float mUnused5;
+	float mUnusedFC;
 	float mSkyEastHorizonColor[3];
-	float mUnused6;
+	float mUnused10C;
 	float mCloud1Color[3];
-	float mUnknown3;
+	float mUnknown11C;
 	float mSkyHorizonHeight;
 	float mSkyHorizonBrightness;
 	float mSunAxisX;
 	float mSunAxisY;
 	float mCloud2Color[3];
-	float mUnused7;
+	float mUnused13C;
 	float mCloud2ShadowStrength;
 	float mCloud2Threshold;
 	float mCloud2Bias1;
@@ -89,34 +89,34 @@ public:
 	float mCloud1Detail;
 	float mCloud1Threshold;
 	float mCloud1Height;
-	float mUnused8;
+	float mUnused17C;
 	float mCloud3Color[3];
-	float mUnused9;
-	float mUnknown29;
-	float mUnused10[3];
+	float mUnused18C;
+	float mUnknown190;
+	float mUnused198[3];
 	float mSunColor[3];
-	float mUnused11;
+	float mUnused1AC;
 	float mCloudsBrightness;
 	float mDetailNoiseOffset;
 	float mStarsBrightness;
 	float mVisibleStars;
 	float mMoonBrightness;
-	float mUnused12[3];
+	float mUnused1C4[3];
 	float mMoonColor[3];
-	float mUnused13;
+	float mUnused1DC;
 	float mMoonGlow;
 	float mMoonParam3;
 	float SunCenterStart;
 	float SunCenterEnd;
 	float mSunSize;
-	float mUnused14[3];
-	float mUnknown46;
+	float mUnused1F8[3];
+	float mUnknown200;
 	float mSkyBrightness;
-	float mUnused15;
+	float mUnused208;
 	int32_t mFilmGrain;
 };
 
-class Timecycle
+struct Timecycle
 {
 public:
 	TimeCycleParams mParams[NUM_HOURS][NUM_WEATHERS];
