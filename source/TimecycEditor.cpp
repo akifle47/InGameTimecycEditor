@@ -55,6 +55,87 @@ void TimecycEditor::Initialize(const uint8_t *baseAddress)
 	LoadSettings();
 	mTimeCycle->Load("pc/data/timecyc.dat", NULL, 0);
 	InitializeColors();
+
+	mTimecycParamNameOffsetAndType[0] = {"Ambient Color 0", 0x0, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[1] = {"Ambient Color 1", 0x4, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[2] = {"Directional Light Color 1", 0x8, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[3] = {"Directional Light Color Multiplier", 0xC, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[4] = {"Ambient Color 0 Multiplier", 0x10, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[5] = {"Ambient Color 1 Multiplier", 0x14, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[6] = {"AO Strength", 0x18, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[7] = {"Ped AO Strength", 0x1C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[8] = {"Rim Lighting Multiplier", 0x20, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[9] = {"Sky Light Multiplier", 0x24, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[10] = {"Sky Bottom Color And Fog Density", 0x2C, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[11] = {"Sun Core", 0x30, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[12] = {"Corona Brightness", 0x34, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[13] = {"Corona Size", 0x3C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[14] = {"Distant Corona Brightness", 0x40, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[15] = {"Far Clip", 0x44, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[16] = {"Fog Start", 0x48, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[17] = {"DOF Start", 0x4C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[18] = {"Near DOF Blur", 0x50, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[19] = {"Far DOF Blur", 0x54, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[20] = {"Far DOF Blur", 0x54, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[21] = {"Low Clouds Color", 0x58, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[22] = {"Bottom Clouds Color", 0x5C, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[23] = {"Water", 0x60, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[24] = {"Water Reflection Multiplier", 0x80, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[25] = {"Particle Brightness", 0x84, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[26] = {"Exposure", 0x88, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[27] = {"Bloom Threshold", 0x8C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[28] = {"Mid Gray Value", 0x90, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[29] = {"Bloom Intensity", 0x94, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[30] = {"Color Correction", 0x98, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[31] = {"Color Add", 0x9C, TIMECYCPARAMTYPE_COLOR_U32};
+	mTimecycParamNameOffsetAndType[32] = {"Desaturation", 0xA0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[33] = {"Contrast", 0xA4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[34] = {"Gamma", 0xA8, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[35] = {"Desaturation Far", 0xAC, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[36] = {"Contrast Far", 0xB0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[37] = {"Gamma Far", 0xB4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[38] = {"DepthFX Near", 0xB8, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[39] = {"DepthFX Far", 0xBC, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[40] = {"Luminance Min", 0xC0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[41] = {"Luminance Max", 0xC4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[42] = {"Luminance Delay", 0xC8, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[43] = {"Cloud Alpha", 0xCC, TIMECYCPARAMTYPE_INT};
+	mTimecycParamNameOffsetAndType[44] = {"Temperature", 0xD4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[45] = {"Global Reflection Multiplier", 0xD8, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[46] = {"Sky Color", 0xE4, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[47] = {"Sky Horizon Color", 0xF4, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[48] = {"Sky East Horizon Color", 0x104, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[49] = {"Cloud 1 Color", 0x114, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[50] = {"Sky Horizon Height", 0x120, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[51] = {"Sky Horizon Brightness", 0x124, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[52] = {"Cloud 2 Color", 0x134, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[53] = {"Cloud 2 Shadow Strength", 0x140, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[54] = {"Cloud 2 Threshold", 0x144, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[55] = {"Cloud 2 Bias 1", 0x148, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[56] = {"Cloud 2 Scale", 0x14C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[57] = {"Cloud In Scattering", 0x150, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[58] = {"Cloud 2 Bias 2", 0x154, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[59] = {"Detail Noise Scale", 0x158, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[60] = {"Detail Noise Multiplier", 0x15C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[61] = {"Cloud 2 Offset", 0x160, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[62] = {"Clouds Fadeout", 0x168, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[63] = {"Cloud 1 Bias", 0x16C, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[64] = {"Cloud 1 Detail", 0x170, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[65] = {"Cloud 1 Threshold", 0x174, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[66] = {"Cloud 1 Height", 0x178, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[67] = {"Cloud 3 Color", 0x184, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[68] = {"Sun Color", 0x1A4, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[69] = {"Clouds Brightness", 0x1B0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[70] = {"Detail Noise Offset", 0x1B4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[71] = {"Stars Brightness", 0x1B8, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[72] = {"Visible Stars", 0x1BC, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[73] = {"Moon Brightness", 0x1C0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[74] = {"Moon Color", 0x1D4, TIMECYCPARAMTYPE_COLOR_FLOAT3};
+	mTimecycParamNameOffsetAndType[75] = {"Moon Glow", 0x1E0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[76] = {"Moon Unknown", 0x1E4, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[77] = {"Sun Size", 0x1F0, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[78] = {"Sky Brightness", 0x204, TIMECYCPARAMTYPE_FLOAT};
+	mTimecycParamNameOffsetAndType[79] = {"Film Grain", 0x20C, TIMECYCPARAMTYPE_INT};
 }
 
 void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
@@ -179,16 +260,16 @@ void TimecycEditor::InitializeColors()
 	{
 		for(uint32_t weather = 0; weather < NUM_WEATHERS; weather++)
 		{
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mAmbient0Color, mAmbient0ColorFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mAmbient1Color, mAmbient1ColorFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mDirLightColor, mDirLightColorFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mSkyBottomColorFogDensity, mSkyBottomColorFogDensityFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mSunCore, mSunCoreFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mLowCloudsColor, mLowCloudsColorFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mBottomCloudsColor, mBottomCloudsColorFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mWater, mWaterFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mColorCorrection, mColorCorrectionFloat4[time][weather]);
-			U32ToFloat4(mTimeCycle->mParams[time][weather].mColorAdd, mColorAddFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mAmbient0Color, mAmbient0ColorFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mAmbient1Color, mAmbient1ColorFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mDirLightColor, mDirLightColorFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mSkyBottomColorFogDensity, mSkyBottomColorFogDensityFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mSunCore, mSunCoreFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mLowCloudsColor, mLowCloudsColorFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mBottomCloudsColor, mBottomCloudsColorFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mWater, mWaterFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mColorCorrection, mColorCorrectionFloat4[time][weather]);
+			Utils::U32ToFloat4(mTimeCycle->mParams[time][weather].mColorAdd, mColorAddFloat4[time][weather]);
 		}
 	}
 }
@@ -356,6 +437,7 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
 		DrawSaveWindow();
 		DrawLoadWindow();
 		DrawSettingsWindow();
+		DrawSetParamForAllHoursAndWeathersWindow();
 	}
 
 	ImGui::EndFrame();
@@ -409,6 +491,16 @@ void TimecycEditor::DrawMainWindow()
 		if(ImGui::BeginMenu("Settings"))
 		{
 			mShowSettingsWindow = true;
+
+			ImGui::EndMenu();
+		}
+
+		if(ImGui::BeginMenu("Tools"))
+		{
+			if(ImGui::MenuItem("Set Param For All Hours And Weathers"))
+			{
+				mShowSetParamForAllHoursAndWeathersWindow = true;
+			}
 
 			ImGui::EndMenu();
 		}
@@ -485,7 +577,7 @@ void TimecycEditor::DrawMainWindow()
 		{
 			ImGui::Text("Color");
 			ImGui::ColorEdit3("##Ambient Light 0 Color", mAmbient0ColorFloat4[mSelectedHourIndex][mSelectedWeather]);
-			Float4ToU32(mAmbient0ColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient0Color);
+			Utils::Float4ToU32(mAmbient0ColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient0Color);
 
 			ImGui::Text("Multiplier");
 			ImGui::DragFloat("##Ambient Light 0 Multiplier", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient0Multiplier, 0.005f, 0.0f, FLT_MAX);
@@ -494,7 +586,7 @@ void TimecycEditor::DrawMainWindow()
 		{
 			ImGui::Text("Color");
 			ImGui::ColorEdit3("##Ambient 1 Color", mAmbient1ColorFloat4[mSelectedHourIndex][mSelectedWeather]);
-			Float4ToU32(mAmbient1ColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient1Color);
+			Utils::Float4ToU32(mAmbient1ColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient1Color);
 
 			ImGui::Text("Multiplier");
 			ImGui::DragFloat("##Ambient Light 1 Light Multiplier", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mAmbient1Multiplier, 0.005f, 0.0f, FLT_MAX);
@@ -503,7 +595,7 @@ void TimecycEditor::DrawMainWindow()
 		{
 			ImGui::Text("Color");
 			ImGui::ColorEdit3("##Directional Light Color", mDirLightColorFloat4[mSelectedHourIndex][mSelectedWeather]);
-			Float4ToU32(mDirLightColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mDirLightColor);
+			Utils::Float4ToU32(mDirLightColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mDirLightColor);
 
 			ImGui::Text("Multiplier");
 			ImGui::DragFloat("##Directional Light multitplier", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mDirLightMultiplier, 0.005f, 0.0f, FLT_MAX);
@@ -515,7 +607,7 @@ void TimecycEditor::DrawMainWindow()
 		{
 			ImGui::Text("Color");
 			ImGui::ColorEdit4("##Water Color", mWaterFloat4[mSelectedHourIndex][mSelectedWeather]);
-			Float4ToU32(mWaterFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mWater);
+			Utils::Float4ToU32(mWaterFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mWater);
 
 			ImGui::Text("Reflection Multiplier");
 			ImGui::DragFloat("##Water Reflection Multiplier", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mWaterReflectionMultiplier, 0.005f, 0.0f, FLT_MAX);
@@ -565,7 +657,7 @@ void TimecycEditor::DrawMainWindow()
 
 			ImGui::Text("Density");
 			ImGui::DragFloat("##Fog Density", &mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather][3], 0.005f, 0.0f, 1.0f);
-			Float4ToU32(mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSkyBottomColorFogDensity);
+			Utils::Float4ToU32(mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSkyBottomColorFogDensity);
 
 			ImGui::TreePop();
 		}
@@ -576,7 +668,7 @@ void TimecycEditor::DrawMainWindow()
 
 			ImGui::Text("Bottom Color");
 			ImGui::ColorEdit3("##Sky Bottom Color", mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather]);
-			Float4ToU32(mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSkyBottomColorFogDensity);
+			Utils::Float4ToU32(mSkyBottomColorFogDensityFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSkyBottomColorFogDensity);
 
 			ImGui::Text("Top Color");
 			ImGui::ColorEdit3("##Sky Top Color", mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSkyColor, ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
@@ -715,11 +807,11 @@ void TimecycEditor::DrawMainWindow()
 
 		ImGui::Text("Color Correction");
 		ImGui::ColorEdit3("##Color Correction", mColorCorrectionFloat4[mSelectedHourIndex][mSelectedWeather]);
-		Float4ToU32(mColorCorrectionFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mColorCorrection);
+		Utils::Float4ToU32(mColorCorrectionFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mColorCorrection);
 
 		ImGui::Text("Color Add");
 		ImGui::ColorEdit3("##Color Add", mColorAddFloat4[mSelectedHourIndex][mSelectedWeather]);
-		Float4ToU32(mColorAddFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mColorAdd);
+		Utils::Float4ToU32(mColorAddFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mColorAdd);
 
 		ImGui::Text("Bloom Threshold");
 		ImGui::DragFloat("##Bloom Threshold", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mBloomThreshold, 0.005f, 0.0f, FLT_MAX);
@@ -774,27 +866,27 @@ void TimecycEditor::DrawMainWindow()
 
 		ImGui::Text("Low clouds Color");
 		ImGui::ColorEdit3("##Low clouds Color", mLowCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather]);
-		Float4ToU32(mLowCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mLowCloudsColor);
+		Utils::Float4ToU32(mLowCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mLowCloudsColor);
 
 		ImGui::Text("Bottom clouds Color");
 		ImGui::ColorEdit3("##Bottom clouds Color", mBottomCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather]);
-		Float4ToU32(mBottomCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mBottomCloudsColor);
+		Utils::Float4ToU32(mBottomCloudsColorFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mBottomCloudsColor);
 
 		ImGui::Text("Cloud alpha");
 		ImGui::DragInt("##Cloud alpha", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mCloudAlpha);
 
 		ImGui::Text("Sun core");
 		ImGui::ColorEdit3("##Sun Core", mSunCoreFloat4[mSelectedHourIndex][mSelectedWeather]);
-		Float4ToU32(mSunCoreFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSunCore);
+		Utils::Float4ToU32(mSunCoreFloat4[mSelectedHourIndex][mSelectedWeather], mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mSunCore);
 
 		ImGui::Text("Unknown 3");
-		ImGui::DragFloat("##Unknown 3", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown3, 0.1f);
+		ImGui::DragFloat("##Unknown 3", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown11C, 0.1f);
 
 		ImGui::Text("Unknown 29");
-		ImGui::DragFloat("##Unknown 29", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown29, 0.1f);
+		ImGui::DragFloat("##Unknown 29", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown190, 0.1f);
 
 		ImGui::Text("Unknown 46");
-		ImGui::DragFloat("##Unknown 46", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown46, 0.1f);
+		ImGui::DragFloat("##Unknown 46", &mTimeCycle->mParams[mSelectedHourIndex][mSelectedWeather].mUnknown200, 0.1f);
 	}
 	
 	ImGui::End();
@@ -969,20 +1061,121 @@ void TimecycEditor::DrawSettingsWindow()
 	}
 }
 
-void TimecycEditor::Float4ToU32(const float *inColor, uint32_t &outColor)
+void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
 {
-	outColor = 0;
-	outColor |= ((uint32_t)(inColor[0] * 255.0f + 0.5f)) << 16;
-	outColor |= ((uint32_t)(inColor[1] * 255.0f + 0.5f)) << 8;
-	outColor |= ((uint32_t)(inColor[2] * 255.0f + 0.5f)) << 0;
-	outColor |= ((uint32_t)(inColor[3] * 255.0f + 0.5f)) << 24;
-}
-void TimecycEditor::U32ToFloat4(const uint32_t inColor, float *outColor)
-{
-	outColor[0] = ((inColor >> 16) & 0xFF) / 255.0f;
-	outColor[1] = ((inColor >> 8)  & 0xFF) / 255.0f;
-	outColor[2] = ((inColor >> 0)  & 0xFF) / 255.0f;
-	outColor[3] = ((inColor >> 24) & 0xFF) / 255.0f;
+	if(mShowSetParamForAllHoursAndWeathersWindow)
+	{
+		ImGui::Begin("Set Param For All Hours And Weathers", NULL, ImGuiWindowFlags_NoResize);
+		{
+			ImGui::SetWindowSize(ImVec2(330.0f, 165.0f));
+
+			static int currentItemIndex = 0;
+
+			ImGui::Text("Parameter");
+			if(ImGui::BeginCombo("##Parameter", std::get<0>(mTimecycParamNameOffsetAndType[currentItemIndex]).c_str(), 0))
+			{
+				for(uint32_t i = 0; i < mTimecycParamNameOffsetAndType.size(); i++)
+				{
+					const bool isSelected = currentItemIndex == i;
+					if(ImGui::Selectable(std::get<0>(mTimecycParamNameOffsetAndType[i]).c_str(), isSelected))
+					{
+						currentItemIndex = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			static float valueFloat = 0.0f;
+			static int32_t valueInt = 0;
+			static float valueColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+			switch(std::get<2>(mTimecycParamNameOffsetAndType[currentItemIndex]))
+			{
+				case TIMECYCPARAMTYPE_COLOR_U32:
+					ImGui::Text("Value");
+					ImGui::ColorEdit4("##Value", valueColor);
+
+					if(ImGui::Button("Apply"))
+					{
+						uint32_t colorU32;
+						Utils::Float4ToU32(valueColor, colorU32);
+
+						for(uint32_t weather = 0; weather < NUM_WEATHERS; weather++)
+						{
+							for(uint32_t hour = 0; hour < NUM_HOURS; hour++)
+							{
+								uint32_t address = (uint32_t)&mTimeCycle->mParams[hour][weather];
+								*(uint32_t *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex])) = colorU32;
+							}
+						}
+
+						InitializeColors();
+						mShowSetParamForAllHoursAndWeathersWindow = false;
+					}
+				break;
+
+				case TIMECYCPARAMTYPE_COLOR_FLOAT3:
+					ImGui::Text("Value");
+					ImGui::ColorEdit4("##Value", valueColor, ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
+
+					if(ImGui::Button("Apply"))
+					{
+						for(uint32_t weather = 0; weather < NUM_WEATHERS; weather++)
+						{
+							for(uint32_t hour = 0; hour < NUM_HOURS; hour++)
+							{
+								uint32_t address = (uint32_t)&mTimeCycle->mParams[hour][weather];
+								*(float *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex]) + 0x0) = valueColor  [0];
+								*(float *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex]) + 0x4) = valueColor  [1];
+								*(float *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex]) + 0x8) = valueColor  [2];
+							}
+						}
+
+						mShowSetParamForAllHoursAndWeathersWindow = false;
+					}
+				break;
+
+				case TIMECYCPARAMTYPE_FLOAT:
+					ImGui::Text("Value");
+					ImGui::DragFloat("##Value", &valueFloat, 0.005f);
+
+					if(ImGui::Button("Apply"))
+					{
+						for(uint32_t weather = 0; weather < NUM_WEATHERS; weather++)
+						{
+							for(uint32_t hour = 0; hour < NUM_HOURS; hour++)
+							{
+								uint32_t address = (uint32_t)&mTimeCycle->mParams[hour][weather];
+								*(float *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex])) = valueFloat;
+							}
+						}
+
+						mShowSetParamForAllHoursAndWeathersWindow = false;
+					}
+				break;
+
+				case TIMECYCPARAMTYPE_INT:
+					ImGui::Text("Value");
+					ImGui::DragInt("##Value", &valueInt, 0.5f);
+
+					if(ImGui::Button("Apply"))
+					{
+						for(uint32_t weather = 0; weather < NUM_WEATHERS; weather++)
+						{
+							for(uint32_t hour = 0; hour < NUM_HOURS; hour++)
+							{
+								uint32_t address = (uint32_t)&mTimeCycle->mParams[hour][weather];
+								*(int32_t *)(address + std::get<1>(mTimecycParamNameOffsetAndType[currentItemIndex])) = valueInt;
+							}
+						}
+
+						mShowSetParamForAllHoursAndWeathersWindow = false;
+					}
+				break;
+			}
+		}
+		ImGui::End();
+	}
 }
 
 int32_t TimecycEditor::TimecycTimeIndexToGameTime(const int32_t timeIndex)

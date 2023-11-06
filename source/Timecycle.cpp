@@ -128,7 +128,7 @@ bool Timecycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
 			file << (mParams[time][weather].mCloud1Color[1]) << " ";
 			file << (mParams[time][weather].mCloud1Color[2]) << "  ";
 
-			file << mParams[time][weather].mUnknown3 << "  ";
+			file << mParams[time][weather].mUnknown11C << "  ";
 			file << mParams[time][weather].mSkyHorizonHeight << "  ";
 			file << mParams[time][weather].mSkyHorizonBrightness << "  ";
 			file << unusedParam << "  ";
@@ -158,7 +158,7 @@ bool Timecycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
 			file << (mParams[time][weather].mCloud3Color[1]) << " ";
 			file << (mParams[time][weather].mCloud3Color[2]) << "  ";
 
-			file << mParams[time][weather].mUnknown29 << "  ";
+			file << mParams[time][weather].mUnknown190 << "  ";
 
 			file << (mParams[time][weather].mSunColor[0]) << " ";
 			file << (mParams[time][weather].mSunColor[1]) << " ";
@@ -179,7 +179,7 @@ bool Timecycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
 			file << unusedParam << "  ";
 			file << unusedParam << "  ";
 			file << mParams[time][weather].mSunSize << "  ";
-			file << mParams[time][weather].mUnknown46 << "  ";
+			file << mParams[time][weather].mUnknown200 << "  ";
 			file << mParams[time][weather].mDOFStart << "  ";
 			file << unusedParam << "  ";
 			file << unusedParam << "  ";
@@ -349,7 +349,7 @@ bool Timecycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
 			currLineSS >> mParams[time][weather].mCloud1Color[1];
 			currLineSS >> mParams[time][weather].mCloud1Color[2];
 
-			currLineSS >> mParams[time][weather].mUnknown3;
+			currLineSS >> mParams[time][weather].mUnknown11C;
 			currLineSS >> mParams[time][weather].mSkyHorizonHeight;
 			currLineSS >> mParams[time][weather].mSkyHorizonBrightness;
 
@@ -379,7 +379,7 @@ bool Timecycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
 			currLineSS >> mParams[time][weather].mCloud3Color[1];
 			currLineSS >> mParams[time][weather].mCloud3Color[2];
 
-			currLineSS >> mParams[time][weather].mUnknown29;
+			currLineSS >> mParams[time][weather].mUnknown190;
 
 			currLineSS >> mParams[time][weather].mSunColor[0];
 			currLineSS >> mParams[time][weather].mSunColor[1];
@@ -400,7 +400,7 @@ bool Timecycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
 
 			currLineSS >> tempUnusedParam >> tempUnusedParam;
 			currLineSS >> mParams[time][weather].mSunSize;
-			currLineSS >> mParams[time][weather].mUnknown46;
+			currLineSS >> mParams[time][weather].mUnknown200;
 			currLineSS >> mParams[time][weather].mDOFStart;
 			currLineSS >> tempUnusedParam >> tempUnusedParam;
 			currLineSS >> mParams[time][weather].mNearDOFBlur;

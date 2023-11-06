@@ -2,6 +2,9 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <tuple>
+#include <unordered_map>
+#include <array>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -40,9 +43,8 @@ private:
 	void DrawSaveWindow();
 	void DrawLoadWindow();
 	void DrawSettingsWindow();
+	void DrawSetParamForAllHoursAndWeathersWindow();
 
-	void Float4ToU32(const float *inColor, uint32_t &outColor);
-	void U32ToFloat4(const uint32_t inColor, float *outColor);
 	int32_t TimecycTimeIndexToGameTime(const int32_t timeIndex);
 	int32_t GameTimeToTimecycTimeIndex(const int32_t gameTime);
 
@@ -92,6 +94,7 @@ private:
 	bool mShowSaveWindow = false;
 	bool mShowLoadWindow = false;
 	bool mShowSettingsWindow = false;
+	bool mShowSetParamForAllHoursAndWeathersWindow = false;
 
 	ImGuiKey mOpenWindowKey = ImGuiKey_F9;
 	ImVec2 mWindowPos = ImVec2(5.0f, 5.0f);
@@ -99,4 +102,14 @@ private:
 	float mItemInnerSpacing = 4.0f;
 	float mFontScale = 1.0f;
 	ImGuiKey mToggleCameraControlKey = ImGuiKey_None;
+	
+	enum TIMECYC_PARAM_TYPE
+	{
+		TIMECYCPARAMTYPE_COLOR_U32 = 1,
+		TIMECYCPARAMTYPE_COLOR_FLOAT3 = 2,
+		TIMECYCPARAMTYPE_FLOAT = 3,
+		TIMECYCPARAMTYPE_INT = 4,
+	};
+
+	std::array<std::tuple<std::string, uint32_t, TIMECYC_PARAM_TYPE>, 80> mTimecycParamNameOffsetAndType;
 };
