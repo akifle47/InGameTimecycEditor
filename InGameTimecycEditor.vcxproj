@@ -20,12 +20,12 @@
     <ClInclude Include="dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="source\EmbeddedFont.h" />
     <ClInclude Include="source\imgui_dx9_backend\imgui_impl_dx9_shader.h" />
-    <ClInclude Include="source\Log.h" />
     <ClInclude Include="source\TimecycEditor.h" />
     <ClInclude Include="source\TimeCycle.h" />
     <ClInclude Include="source\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dependencies\Hooking.Patterns\Hooking.Patterns.cpp" />
     <ClCompile Include="dependencies\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="dependencies\imgui\imgui.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_demo.cpp" />
@@ -71,18 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)build\$(Configuration)\bin\</OutDir>
+    <OutDir Condition="'$(GTAIV_DIR)' != ''">$(GTAIV_DIR)\</OutDir>
+    <OutDir Condition="'$(GTAIV_DIR)' == ''">$(SolutionDir)build\$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
-    <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>dependencies/minidx9/include/;dependencies/injector/include/;dependencies/Hooking.Patterns/;dependencies/;$(IncludePath)</IncludePath>
+    <LibraryPath>dependencies/minidx9/Lib/x86/;$(LibraryPath)</LibraryPath>
     <TargetExt>.asi</TargetExt>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)build\$(Configuration)\bin\</OutDir>
+    <OutDir Condition="'$(GTAIV_DIR)' != ''">$(GTAIV_DIR)\</OutDir>
+    <OutDir Condition="'$(GTAIV_DIR)' == ''">$(SolutionDir)build\$(Configuration)\bin\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
-    <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>dependencies/minidx9/include/;dependencies/injector/include/;dependencies/Hooking.Patterns/;dependencies/;$(IncludePath)</IncludePath>
+    <LibraryPath>dependencies/minidx9/Lib/x86/;$(LibraryPath)</LibraryPath>
     <TargetExt>.asi</TargetExt>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
@@ -90,14 +92,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\minhook\include;$(SolutionDir)dependencies\minidx9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>MinHook.lib;d3dx9.lib;d3d9.lib;dinput8.lib;dxguid.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>1.21</Version>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\minidx9\Lib\x86;$(SolutionDir)dependencies\minhook\build\VC22\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -108,9 +111,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\imgui;$(SolutionDir)dependencies\minhook\include;$(SolutionDir)dependencies\minidx9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,7 +122,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Version>1.21</Version>
-      <AdditionalDependencies>MinHook.lib;d3dx9.lib;d3d9.lib;dinput8.lib;dxguid.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\minidx9\Lib\x86;$(SolutionDir)dependencies\minhook\build\VC22\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

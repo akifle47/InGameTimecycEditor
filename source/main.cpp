@@ -1,247 +1,157 @@
-#define WIN32_LEAN_AND_MEAN
+#define DIRECTINPUT_VERSION 0x0800
 
-#include <Windows.h>
 #include "TimecycEditor.h"
-#include "Log.h"
+#include "Hooking.Patterns.h"
+#include "injector/injector.hpp"
 
-std::ofstream Log::mLogFile;
-
-typedef HRESULT(__stdcall D3D9DeviceEndSceneT)(IDirect3DDevice9*);
-typedef HRESULT(__stdcall D3D9DeviceResetT)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
-typedef HRESULT(__stdcall DInput8DeviceGetDeviceStateT)(IDirectInputDevice8*, DWORD, LPVOID);
-typedef HRESULT(__stdcall DInput8DeviceAcquireT)(IDirectInputDevice8*);
-
-void *gD3D9Device_vtbl[119] = {};
-D3D9DeviceEndSceneT *D3D9DeviceEndSceneO = nullptr;
-D3D9DeviceResetT    *D3D9DeviceResetO = nullptr;
-
-void *gDinpu8Device_vtbl[32] = {};
-DInput8DeviceGetDeviceStateT *DInput8DeviceGetDeviceStateO = nullptr;
-DInput8DeviceAcquireT *DInput8DeviceAcquireO = nullptr;
-
-WNDPROC WndProcO = nullptr;
+#include <d3d9.h>
+#include <dinput.h>
 
 TimecycEditor gTimecycEditor;
 
-HANDLE gMainThreadHandle = nullptr;
-
-//Function Hooks
-
+WNDPROC WndProcO = nullptr;
 LRESULT CALLBACK WndProcH(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if(gTimecycEditor.OnWndProc(hWnd, uMsg, wParam, lParam))
-		return true;
-	
-	return CallWindowProc(WndProcO, hWnd, uMsg, wParam, lParam);
+    if(gTimecycEditor.OnWndProc(hWnd, uMsg, wParam, lParam))
+        return true;
+    
+    return CallWindowProc(WndProcO, hWnd, uMsg, wParam, lParam);
 }
 
-HRESULT __stdcall D3D9DeviceResetH(IDirect3DDevice9 *This, D3DPRESENT_PARAMETERS *pPresentationParameters)
+HRESULT(__stdcall* D3D9DeviceResetO)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*) = nullptr;
+HRESULT __stdcall D3D9DeviceResetH(IDirect3DDevice9* This, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	gTimecycEditor.OnBeforeD3D9DeviceReset(This);
+    gTimecycEditor.OnBeforeD3D9DeviceReset(This);
 
-	HRESULT hr = D3D9DeviceResetO(This, pPresentationParameters);
+    HRESULT hr = D3D9DeviceResetO(This, pPresentationParameters);
 
-	gTimecycEditor.OnAfterD3D9DeviceReset();
+    gTimecycEditor.OnAfterD3D9DeviceReset();
 
-	return hr;
+    return hr;
 }
 
-HRESULT APIENTRY D3D9DeviceEndSceneH(LPDIRECT3DDEVICE9 This)
+HRESULT(__stdcall* D3D9DeviceEndSceneO)(IDirect3DDevice9*) = nullptr;
+HRESULT __stdcall D3D9DeviceEndSceneH(LPDIRECT3DDEVICE9 This)
 {
-	gTimecycEditor.OnBeforeD3D9DeviceEndScene(This);
+    gTimecycEditor.OnBeforeD3D9DeviceEndScene(This);
 
-	return D3D9DeviceEndSceneO(This);
+    return D3D9DeviceEndSceneO(This);
 }
 
-//maybe not the best way to do this but it works, its simple and doesn't cause any issues with the game
+HRESULT(__stdcall* DInput8DeviceGetDeviceStateO)(IDirectInputDevice8*, DWORD, LPVOID) = nullptr;
 HRESULT __stdcall DInput8DeviceGetDeviceStateH(IDirectInputDevice8 *This, DWORD cbData, LPVOID lpvData)
 {
-	HRESULT hr = DInput8DeviceGetDeviceStateO(This, cbData, lpvData);
-	
-	if(gTimecycEditor.mDisableMouseControl)
-	{
-		if(cbData == sizeof(DIMOUSESTATE) || cbData == sizeof(DIMOUSESTATE2))
-		{
-			This->Unacquire();
-		}
-	}
+    HRESULT hr = DInput8DeviceGetDeviceStateO(This, cbData, lpvData);
+    
+    if(gTimecycEditor.mDisableMouseControl)
+    {
+        if(cbData == sizeof(DIMOUSESTATE) || cbData == sizeof(DIMOUSESTATE2))
+        {
+            This->Unacquire();
+        }
+    }
 
-	return hr;
+    return hr;
 }
 
+HRESULT(__stdcall* DInput8DeviceAcquireO)(IDirectInputDevice8*) = nullptr;
 HRESULT __stdcall DInput8DeviceAcquireH(IDirectInputDevice8 *This)
 {
-	if(gTimecycEditor.mDisableMouseControl)
-	{
-		return DI_OK;
-	}
+    if(gTimecycEditor.mDisableMouseControl)
+    {
+        return DI_OK;
+    }
 
-	return DInput8DeviceAcquireO(This);
+    return DInput8DeviceAcquireO(This);
 }
 
-//Functions
+HWND(__cdecl* grcDevice__CreateDeviceWindowO)() = nullptr;
+HWND grcDevice__CreateDeviceWindowH()
+{
+    HWND hwnd = grcDevice__CreateDeviceWindowO();
+    WndProcO = (WNDPROC)SetWindowLongPtr(hwnd, GWL_WNDPROC, (LONG_PTR)WndProcH);
+
+    return hwnd;
+}
+
+
+void CatastrophicError(const wchar_t* msg)
+{
+    MessageBox(0, msg, L"Error", MB_OK | MB_ICONERROR);
+
+    #ifdef _DEBUG
+        __debugbreak();
+    #endif // DEBUG
+
+    std::abort();
+}
 
 bool Initialize()
 {
-	std::stringstream logStream;
-	MH_STATUS mhStatus;
-	uint8_t *baseAddress = (uint8_t*)GetModuleHandle(NULL);
+    gTimecycEditor.Initialize();
 
-	gTimecycEditor.Initialize(baseAddress);
+    // DirectInput hooks
 
-	if(!*gD3D9Device_vtbl)
-	{
-		if(!Utils::GetD3D9DeviceVTable(baseAddress, gD3D9Device_vtbl))
-		{
-			return false;
-		}
-	}
-	
-	if(!*gDinpu8Device_vtbl)
-	{
-		if(!Utils::GetDInput8DeviceVTable(gDinpu8Device_vtbl))
-		{
-			return false;
-		}
-	}
+    IDirectInput8W* dinput8 = nullptr;
+    if(FAILED(DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8W, (void**)&dinput8, 0)))
+    {
+        CatastrophicError(L"Failed to create a DirectInput interface.");
+        return false;
+    }
 
-	if(*gD3D9Device_vtbl)
-	{
-		if(!D3D9DeviceEndSceneO)
-		{
-			mhStatus = MH_CreateHook(gD3D9Device_vtbl[42], &D3D9DeviceEndSceneH, (void**)&D3D9DeviceEndSceneO);
-			if(mhStatus != MH_OK)
-			{
-				logStream << "IDirect3DDevice9::EndScene hook could not be created - " << MH_StatusToString(mhStatus);
-				Log::Error(logStream.str());
+    IDirectInputDevice8W* dinput8Device = nullptr;
+    if(dinput8->CreateDevice(GUID_SysMouse, &dinput8Device, NULL) != DI_OK)
+    {
+        CatastrophicError(L"Failed to create a DirectInput device.");
+        return false;
+    }
 
-				return false;
-			}
+    uint32_t* dinput8Device_vft = *(uint32_t**)dinput8Device;
 
-			Log::Info("Created IDirect3DDevice9::EndScene hook");
-		}
+    DInput8DeviceGetDeviceStateO = (decltype(DInput8DeviceGetDeviceStateO))dinput8Device_vft[9];
+    dinput8Device_vft[9] = (uint32_t)DInput8DeviceGetDeviceStateH;
 
-		if(!D3D9DeviceResetO)
-		{
-			mhStatus = MH_CreateHook(gD3D9Device_vtbl[16], &D3D9DeviceResetH, (void**)&D3D9DeviceResetO);
-			if(mhStatus != MH_OK)
-			{
-				logStream << "IDirect3DDevice9::Reset hook could not be created - " << MH_StatusToString(mhStatus);
-				Log::Error(logStream.str());
+    DInput8DeviceAcquireO = (decltype(DInput8DeviceAcquireO))dinput8Device_vft[7];
+    dinput8Device_vft[7] = (uint32_t)DInput8DeviceAcquireH;
 
-				return false;
-			}
+    dinput8->Release();
+    dinput8Device->Release();
 
-			Log::Info("Created IDirect3DDevice9::Reset hook");
-		}
-	}
+    // D3D9 hooks
 
-	if(*gDinpu8Device_vtbl)
-	{
-		if(!DInput8DeviceGetDeviceStateO)
-		{
-			mhStatus = MH_CreateHook(gDinpu8Device_vtbl[9], &DInput8DeviceGetDeviceStateH, (void**)&DInput8DeviceGetDeviceStateO);
-			if(mhStatus != MH_OK)
-			{
-				logStream << "IDirectInputDevice8::GetDeviceState hook could not be created - " << MH_StatusToString(mhStatus);
-				Log::Error(logStream.str());
+    auto pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? 8B 0D ? ? ? ? 8B 51");
+    if(pattern.empty())
+        pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? A1 ? ? ? ? 68 ? ? ? ? ? ? 6A");
+    uint32_t* d3d9_vft = **(uint32_t***)pattern.get_first(6);
 
-				return false;
-			}
+    D3D9DeviceEndSceneO = (decltype(D3D9DeviceEndSceneO))d3d9_vft[42];
+    d3d9_vft[42] = (uint32_t)D3D9DeviceEndSceneH;
 
-			Log::Info("Created IDirectInputDevice8::GetDeviceState hook");
-		}
+    D3D9DeviceResetO = (decltype(D3D9DeviceResetO))d3d9_vft[16];
+    d3d9_vft[16] = (uint32_t)D3D9DeviceResetH;
 
-		if(!DInput8DeviceAcquireO)
-		{
-			mhStatus = MH_CreateHook(gDinpu8Device_vtbl[7], &DInput8DeviceAcquireH, (void**)&DInput8DeviceAcquireO);
-			if(mhStatus != MH_OK)
-			{
-				logStream << "IDirectInputDevice8::Acquire hook could not be created - " << MH_StatusToString(mhStatus);
-				Log::Error(logStream.str());
+    // wom
 
-				return false;
-			}
+    pattern = hook::pattern("E8 ? ? ? ? A3 ? ? ? ? A1 ? ? ? ? C6 05");
+    if(pattern.empty())
+    {
+        pattern = hook::pattern("E8 ? ? ? ? A3 ? ? ? ? C6 05 ? ? ? ? ? A1");
+        if(pattern.empty())
+        {
+            pattern = hook::pattern("E8 ? ? ? ? 8B 0D ? ? ? ? A3 ? ? ? ? C6 05");
+        }
+    }
+    grcDevice__CreateDeviceWindowO = injector::MakeCALL(pattern.get_first(0), grcDevice__CreateDeviceWindowH).get();
 
-			Log::Info("Created IDirectInputDevice8::Acquire hook");
-		}
-	}
-
-	if(!WndProcO)
-	{
-		WndProcO = (WNDPROC)SetWindowLongPtr(FindWindow(L"grcWindow", L"GTAIV"), GWL_WNDPROC, (LONG_PTR)WndProcH);
-		
-		if(!WndProcO)
-		{ 
-			return false;
-		}
-	}
-	
-	mhStatus = MH_EnableHook(MH_ALL_HOOKS);
-	if(mhStatus != MH_OK)
-	{
-		logStream << "Failed to enable hooks - " << MH_StatusToString(mhStatus);
-		Log::Error(logStream.str());
-
-		return false;
-	}
-
-	return true;
-}
-
-void MainLoop()
-{
-	static bool initialized = false;
-
-	while(!initialized)
-	{
-		Sleep(300);
-
-		initialized = Initialize();
-	}
-
-	DWORD exitCode;
-	GetExitCodeThread(gMainThreadHandle, &exitCode);
-	TerminateThread(gMainThreadHandle, exitCode);
+    return true;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-	if(fdwReason == DLL_PROCESS_ATTACH)
-	{
-		if(!Log::Initialize())
-		{
-			return false;
-		}
+    if(fdwReason == DLL_PROCESS_ATTACH)
+    {
+        return Initialize();
+    }
 
-		std::stringstream logStream;
-		int32_t gameVersion = 0;
-
-		if(!Utils::GetGameVersion(gameVersion))
-		{
-			logStream << "In Game Timecyc Editor only supports patch 4, 7, 8 and CE - " << std::to_string(gameVersion);
-			Log::Error(logStream.str());
-
-			return false;
-		}
-		
-		logStream << "Game Version: " << gameVersion;
-		Log::Info(logStream.str());
-		logStream.clear();
-
-		MH_STATUS mhStatus = MH_Initialize();
-		if(mhStatus != MH_OK)
-		{
-			logStream << "MinHook could not be initialized - " << MH_StatusToString(mhStatus);
-			Log::Error(logStream.str());
-
-			return false;
-		}
-
-		Log::Info("MinHook initialized");
-
-		gMainThreadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MainLoop, NULL, 0, NULL);
-	}
-
-	return true;
+    return true;
 }
