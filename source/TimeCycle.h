@@ -1,126 +1,135 @@
 #pragma once
-#include <cstdint>
-#include <string>
 
-const uint32_t NUM_HOURS = 11;
-const uint32_t NUM_WEATHERS = 9;
+#include "Color.h"
 
-struct TimeCycleParams
+namespace rage
+{
+    struct SkyHatPerFrameSettings
+    {
+        float m_fSkyColor[3];
+        float field_C;
+        float m_fSkyHorizonColor[3];
+        float field_1C;
+        float m_fSkyEastHorizonColor[3];
+        float field_2C;
+        float m_fSunsetColor[3];
+        float m_fUnknown_3C; // unused
+        float m_fSkyHorizonHeight;
+        float m_fSkyHorizonBrightness;
+        float m_fSunAxisX;
+        float m_fSunAxisY;
+        float m_fCloudColor[3];
+        float field_5C;
+        float m_fCloud2ShadowStrength;
+        float m_fCloud2Threshold;
+        float m_fCloud2Bias1;
+        float m_fCloud2ShadowOffset;
+        float m_fCloudInScatteringRange;
+        float m_fEdgeSmooth;
+        float m_fDetailNoiseScale;
+        float m_fDetailNoiseMultiplier;
+        float m_fCloud2Thickness;
+        float m_fCloudWarp;
+        float m_fCloudsFadeOut;
+        float m_fCloud1Bias;
+        float m_fCloud1Detail;
+        float m_fCloud1Threshold;
+        float m_fCloud1Height;
+        float field_9C;
+        float m_fTopCloudColor[3];
+        float field_AC;
+        float m_fTopCloudLight;
+        float field_B4[3];
+        float m_fSunColor[3];
+        float field_CC;
+        float m_fUnderlighting;
+        float m_fDetailNoiseOffset;
+        float m_fStarFieldBrightness;
+        float m_fStarFieldThreshold;
+        float m_fMoonBrightness;
+        float field_E4[3];
+        float m_fMoonColor[3];
+        float field_FC;
+        float m_fMoonGlow;
+        float m_fMoonTransparency;
+        float m_fSunCenterStart;
+        float m_fSunCenterEnd;
+        float m_fSunBrightness;
+        float field_114;
+    };
+}
+static_assert(sizeof(rage::SkyHatPerFrameSettings) == 0x118);
+
+struct TimeCycle
 {
 public:
-	//unknown means its a timecyc.dat parameter and i dont know what it does
-	//unused means its not a timecyc.dat parameter and i dont care what it does
-	uint32_t mAmbient0Color;
-	uint32_t mAmbient1Color;
-	uint32_t mDirLightColor;
-	float mDirLightMultiplier;
-	float mAmbient0Multiplier;
-	float mAmbient1Multiplier;
-	float mAOStrength;
-	float mPedAOStrength;
-	float mRimLightingMultiplier;
-	float mSkyLightMultiplier;
-	float mDirLightSpecMultiplier;
-	uint32_t mSkyBottomColorFogDensity;
-	uint32_t mSunCore;
-	float mCoronaBrightness;
-	float mCoronaSize;
-	float mDistantCoronaBrightness;
-	float mDistantCoronaSize;
-	float mFarClip;
-	float mFogStart;
-	float mDOFStart;
-	float mNearDOFBlur;
-	float mFarDOFBlur;
-	uint32_t mLowCloudsColor;
-	uint32_t mBottomCloudsColor;
-	uint32_t mWater;
-	float mUnused64[7];
-	float mWaterReflectionMultiplier;
-	float mParticleBrightness;
-	float mExposure;
-	float mBloomThreshold;
-	float mMidGrayValue;
-	float mBloomIntensity;
-	uint32_t mColorCorrection;
-	uint32_t mColorAdd;
-	float mDesaturation;
-	float mContrast;
-	float mGamma;
-	float mDesaturationFar;
-	float mContrastFar;
-	float mGammaFar;
-	float mDepthFxNear;
-	float mDepthFxFar;
-	float mLumMin;
-	float mLumMax;
-	float mLumDelay;
-	int32_t mCloudAlpha;
-	float mUnusedD0;
-	float mTemperature;
-	float mGlobalReflectionMultiplier;
-	float mUnusedDC;
-	float mSkyColor[3];
-	float mUnusedEC;
-	float mSkyHorizonColor[3];
-	float mUnusedFC;
-	float mSkyEastHorizonColor[3];
-	float mUnused10C;
-	float mCloud1Color[3];
-	float mUnknown11C;
-	float mSkyHorizonHeight;
-	float mSkyHorizonBrightness;
-	float mSunAxisX;
-	float mSunAxisY;
-	float mCloud2Color[3];
-	float mUnused13C;
-	float mCloud2ShadowStrength;
-	float mCloud2Threshold;
-	float mCloud2Bias1;
-	float mCloud2Scale;
-	float mCloudInScatteringRange;
-	float mCloud2Bias2;
-	float mDetailNoiseScale;
-	float mDetailNoiseMultiplier;
-	float mCloud2Offset;
-	float mCloudWarp;
-	float mCloudsFadeOut;
-	float mCloud1Bias;
-	float mCloud1Detail;
-	float mCloud1Threshold;
-	float mCloud1Height;
-	float mUnused17C;
-	float mCloud3Color[3];
-	float mUnused18C;
-	float mUnknown190;
-	float mUnused198[3];
-	float mSunColor[3];
-	float mUnused1AC;
-	float mCloudsBrightness;
-	float mDetailNoiseOffset;
-	float mStarsBrightness;
-	float mVisibleStars;
-	float mMoonBrightness;
-	float mUnused1C4[3];
-	float mMoonColor[3];
-	float mUnused1DC;
-	float mMoonGlow;
-	float mMoonParam3;
-	float SunCenterStart;
-	float SunCenterEnd;
-	float mSunSize;
-	float mUnused1F8[3];
-	float mUnknown200;
-	float mSkyBrightness;
-	float mUnused208;
-	int32_t mFilmGrain;
-};
+    static bool Save(const char* fileName, char* errMessage, uint32_t errMessageSize);
+    static bool Load(const char* fileName, char* errMessage, uint32_t errMessageSize);
 
-struct Timecycle
-{
 public:
-	TimeCycleParams mParams[NUM_HOURS][NUM_WEATHERS];
+    static constexpr uint32_t NUM_HOURS = 11;
+    static constexpr uint32_t NUM_WEATHERS = 9;
 
-	bool Save(const char *fileName, char *errMessage, uint32_t errMessageSize);
-	bool Load(const char *fileName, char *errMessage, uint32_t errMessageSize);
+    struct CColourSet
+    {
+        Color32 m_Ambient0Color;
+        Color32 m_Ambient1Color;
+        Color32 m_DirLightColor;
+        float m_fDirLightMultiplier;
+        float m_fAmbient0Multiplier;
+        float m_fAmbient1Multiplier;
+        float m_fAOStrength;
+        float m_fPedAOStrength;
+        float m_fRimLightingMultiplier;
+        float m_fSkyLightMultiplier;
+        float m_fDirLightSpecMultiplier;
+        Color32 m_FogColorDensity;
+        Color32 m_SunCore;
+        float m_fCoronaBrightness;
+        float m_fCoronaSize;
+        float m_fDistantCoronaBrightness;
+        float m_fDistantCoronaSize;
+        float m_fFarClip;
+        float m_fFogStart;
+        float m_fDOFStart;
+        float m_fNearDOFBlur;
+        float m_fFarDOFBlur;
+        Color32 m_LowCloudsColor;
+        Color32 m_BottomCloudsColor;
+        Color32 m_Water;
+        float field_64[7];
+        float m_fWaterReflectionMultiplier;
+        float m_fParticleBrightness;
+        float m_fExposure;
+        float m_fBloomThreshold;
+        float m_fMidGrayValue;
+        float m_fBloomIntensity;
+        Color32 m_ColorCorrection;
+        Color32 m_ColorAdd;
+        float m_fDesaturation;
+        float m_fContrast;
+        float m_fGamma;
+        float m_fDesaturationFar;
+        float m_fContrastFar;
+        float m_fGammaFar;
+        float m_fDepthFxNear;
+        float m_fDepthFxFar;
+        float m_fLumMin;
+        float m_fLumMax;
+        float m_fLumDelay;
+        int32_t m_CloudAlpha;
+        float field_D0;
+        float m_fTemperature;
+        float m_fGlobalReflectionMultiplier;
+        float field_DC;
+        rage::SkyHatPerFrameSettings m_SkyHatSettings;
+        float field_1F8[2];
+        float m_fSunGlowTransparency;
+        float m_fSkyBrightness;
+        float field_208;
+        int32_t m_FilmGrain;
+    };
+    static_assert(sizeof(CColourSet) == 0x210);
+
+    static inline CColourSet (*m_ColourSets)[NUM_WEATHERS];
 };

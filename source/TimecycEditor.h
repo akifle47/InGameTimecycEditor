@@ -2,12 +2,12 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include "Utils.h"
 #include "TimeCycle.h"
 
 #include "imgui_dx9_backend/imgui_impl_dx9_shader.h"
 
 #include <tuple>
+#include <string>
 #include <array>
 #include <Windows.h>
 
@@ -30,7 +30,6 @@ public:
 
 private:
     void InitializeImGui(IDirect3DDevice9 *d3d9Device);
-    void InitializeColors();
 
     void SaveSettings();
     void LoadSettings();
@@ -48,21 +47,6 @@ private:
     void (__cdecl *ReleaseWeather)() = nullptr;
     int32_t(__cdecl* SetTimeOneDayForward)() = nullptr;
     int32_t(__cdecl* SetTimeOneDayBack)() = nullptr;
-
-    //Copy of timecyc parameters in types that are supported by ImGui
-    float mAmbient0ColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mAmbient1ColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mDirLightColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mSkyBottomColorFogDensityFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mSunCoreFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mLowCloudsColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mBottomCloudsColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mWaterFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mColorCorrectionFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mColorAddFloat4[NUM_HOURS][NUM_WEATHERS][4];
-    float mSkyTopColorFloat4[NUM_HOURS][NUM_WEATHERS][4];
-
-    Timecycle *mTimeCycle = nullptr;
 
     int32_t *mHour = nullptr;
     int32_t *mMinutes = nullptr;
