@@ -263,7 +263,7 @@ void TimecycEditor::SaveSettings()
     file.write((char*)&mFontScale, sizeof(float));
     file.write((char*)&mOpenWindowKey, sizeof(ImGuiKey));
     file.write((char*)&mToggleCameraControlKey, sizeof(ImGuiKey));
-    file.write((char*)&mItemInnerSpacing, sizeof(float));
+    //file.write((char*)&mItemInnerSpacing, sizeof(float));
 }
 
 void TimecycEditor::LoadSettings()
@@ -283,12 +283,12 @@ void TimecycEditor::LoadSettings()
     file.read((char*)&mFontScale, sizeof(float));
     file.read((char*)&mOpenWindowKey, sizeof(ImGuiKey));
     file.read((char*)&mToggleCameraControlKey, sizeof(ImGuiKey));
-    file.read((char*)&mItemInnerSpacing, sizeof(float));
+    //file.read((char*)&mItemInnerSpacing, sizeof(float));
 
     if(mIsImGuiInitialized)
     {
         ImGui::GetIO().FontGlobalScale = mFontScale;
-        ImGui::GetStyle().ItemInnerSpacing.x = mItemInnerSpacing;
+        //ImGui::GetStyle().ItemInnerSpacing.x = 4.0f;
     }
 
     HWND gameWindow = FindWindow(L"grcWindow", L"GTAIV");
@@ -461,7 +461,6 @@ void TimecycEditor::DrawMainWindow()
         if(ImGui::BeginMenu("Settings"))
         {
             mShowSettingsWindow = true;
-
             ImGui::EndMenu();
         }
 
@@ -947,10 +946,13 @@ void TimecycEditor::DrawSettingsWindow()
 {
     if(mShowSettingsWindow)
     {
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
         ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_NoResize);
         {
             ImGui::SetWindowSize(ImVec2(330.0f, 345.0f));
-            
+
             ImGui::Text("Position");
             ImGui::DragFloat2("##Position", (float*)&mWindowPos, 1.0f, 0.0f, FLT_MAX);
             ImGui::Text("Size");
@@ -958,12 +960,11 @@ void TimecycEditor::DrawSettingsWindow()
             ImGui::Text("Font Scale");
             ImGui::DragFloat("##Font Scale", &mFontScale, 0.001f, 0.1f, 2.0f);
             ImGui::Text("Item Inner Spacing");
-            ImGui::DragFloat("##Item Inner Spacing", &mItemInnerSpacing, 0.1f, 0.1f, 100.0f);
 
             ImGui::GetIO().FontGlobalScale = mFontScale;
-            ImGui::GetStyle().ItemInnerSpacing.x = mItemInnerSpacing;
 
-            //open window key setting
+            // open window key
+
             ImGui::NewLine();
 
             static ImGuiKey newOpenWindowKey = mOpenWindowKey;
@@ -992,8 +993,9 @@ void TimecycEditor::DrawSettingsWindow()
             }
 
             ImGui::NewLine();
-            
-            //toggle mouse control setting
+
+            // toggle player control
+
             static ImGuiKey newCameraToggleKey = mToggleCameraControlKey;
             std::string toggleCameraKeyStr = "Toggle Camera Control Key: " + std::string(ImGui::GetKeyName(newCameraToggleKey));
             ImGui::Text(toggleCameraKeyStr.c_str());
@@ -1019,6 +1021,8 @@ void TimecycEditor::DrawSettingsWindow()
                 }
             }
 
+            // saving and loading
+
             ImGui::NewLine();
 
             if(ImGui::Button("Save"))
@@ -1026,7 +1030,7 @@ void TimecycEditor::DrawSettingsWindow()
                 mOpenWindowKey = newOpenWindowKey;
                 mToggleCameraControlKey = newCameraToggleKey;
                 SaveSettings();
-                mShowSettingsWindow = false;
+                    mShowSettingsWindow = false;
                 showChangeWindowKeyPrompt = false;
                 showChangeCameraToggleKeyPrompt = false;
             }
@@ -1038,7 +1042,7 @@ void TimecycEditor::DrawSettingsWindow()
                 newOpenWindowKey = mOpenWindowKey;
                 newCameraToggleKey = mToggleCameraControlKey;
                 LoadSettings();
-                mShowSettingsWindow = false;
+                    mShowSettingsWindow = false;
                 showChangeWindowKeyPrompt = false;
                 showChangeCameraToggleKeyPrompt = false;
             }
@@ -1051,6 +1055,9 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
 {
     if(mShowSetParamForAllHoursAndWeathersWindow)
     {
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
         ImGui::Begin("Set Param For All Hours And Weathers", nullptr, ImGuiWindowFlags_NoResize);
         {
             ImGui::SetWindowSize(ImVec2(330.0f, 165.0f));

@@ -26,7 +26,7 @@ public:
 
     void OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device);
 
-    bool mDisableMouseControl = false;
+    bool DisablePlayerControls() { return mDisableMouseControl; };
 
 private:
     void InitializeImGui(IDirect3DDevice9 *d3d9Device);
@@ -48,6 +48,8 @@ private:
     int32_t(__cdecl* SetTimeOneDayForward)() = nullptr;
     int32_t(__cdecl* SetTimeOneDayBack)() = nullptr;
 
+    bool mDisableMouseControl = false;
+
     int32_t *mHour = nullptr;
     int32_t *mMinutes = nullptr;
     uint32_t *mTimerLength = nullptr;
@@ -63,7 +65,7 @@ private:
     bool mOnlyTimecycTimes = true;
 
     const uint8_t mSettingsFileMajorVersion = 1;
-    const uint8_t mSettingsFileMinorVersion = 1;
+    const uint8_t mSettingsFileMinorVersion = 2;
 
     bool mShowWindow = false;
     bool mShowSaveWindow = false;
@@ -74,7 +76,6 @@ private:
     ImGuiKey mOpenWindowKey = ImGuiKey_F9;
     ImVec2 mWindowPos = ImVec2(5.0f, 5.0f);
     ImVec2 mWindowSize = ImVec2(440.0f, 650.0f);
-    float mItemInnerSpacing = 4.0f;
     float mFontScale = 1.0f;
     ImGuiKey mToggleCameraControlKey = ImGuiKey_None;
     

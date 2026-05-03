@@ -43,7 +43,7 @@ HRESULT __stdcall DInput8DeviceGetDeviceStateH(IDirectInputDevice8 *This, DWORD 
 {
     HRESULT hr = DInput8DeviceGetDeviceStateO(This, cbData, lpvData);
     
-    if(gTimecycEditor.mDisableMouseControl)
+    if(gTimecycEditor.DisablePlayerControls())
     {
         if(cbData == sizeof(DIMOUSESTATE) || cbData == sizeof(DIMOUSESTATE2))
         {
@@ -57,7 +57,7 @@ HRESULT __stdcall DInput8DeviceGetDeviceStateH(IDirectInputDevice8 *This, DWORD 
 HRESULT(__stdcall* DInput8DeviceAcquireO)(IDirectInputDevice8*) = nullptr;
 HRESULT __stdcall DInput8DeviceAcquireH(IDirectInputDevice8 *This)
 {
-    if(gTimecycEditor.mDisableMouseControl)
+    if(gTimecycEditor.DisablePlayerControls())
     {
         return DI_OK;
     }
