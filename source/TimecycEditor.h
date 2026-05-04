@@ -39,6 +39,7 @@ private:
     void DrawLoadWindow();
     void DrawSettingsWindow();
     void DrawSetParamForAllHoursAndWeathersWindow();
+    void DrawLicensesWindow();
 
     int32_t TimecycTimeIndexToGameTime(const int32_t timeIndex);
     int32_t GameTimeToTimecycTimeIndex(const int32_t gameTime);
@@ -72,6 +73,7 @@ private:
     bool mShowLoadWindow = false;
     bool mShowSettingsWindow = false;
     bool mShowSetParamForAllHoursAndWeathersWindow = false;
+    bool mShowLicensesWindow = false;
 
     ImGuiKey mOpenWindowKey = ImGuiKey_F9;
     ImVec2 mWindowPos = ImVec2(5.0f, 5.0f);

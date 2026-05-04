@@ -444,10 +444,12 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
     if(mShowWindow)
     {
         DrawMainWindow();
+
         DrawSaveWindow();
         DrawLoadWindow();
         DrawSettingsWindow();
         DrawSetParamForAllHoursAndWeathersWindow();
+        DrawLicensesWindow();
     }
 
     ImGui::EndFrame();
@@ -503,11 +505,16 @@ void TimecycEditor::DrawMainWindow()
             ImGui::EndMenu();
         }
 
-        if(ImGui::BeginMenu("Tools"))
+        if(ImGui::BeginMenu("Other"))
         {
             if(ImGui::MenuItem("Set Param For All Hours And Weathers"))
             {
                 mShowSetParamForAllHoursAndWeathersWindow = true;
+            }
+
+            if(ImGui::MenuItem("Licenses"))
+            {
+                mShowLicensesWindow = true;
             }
 
             ImGui::EndMenu();
@@ -515,8 +522,6 @@ void TimecycEditor::DrawMainWindow()
 
         ImGui::EndMenuBar();
     }
-
-ImGui::Text("Undo Actions (%d) Redo Actions (%d)", sUndoStack.size(), sRedoStack.size());
 
     ImGui::Checkbox("Lock to Selected Time, Weather and Day", &mLockTimeAndWeather);
     if(ImGui::IsItemEdited())
@@ -1184,7 +1189,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-        ImGui::Begin("Set Param For All Hours And Weathers", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Set Param For All Hours And Weathers", &mShowSetParamForAllHoursAndWeathersWindow, ImGuiWindowFlags_NoResize);
         {
             ImGui::SetWindowSize(ImVec2(330.0f, 165.0f));
 
@@ -1291,7 +1296,77 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
                     }
                 break;
             }
+
+            ImGui::SameLine();
+            if(ImGui::Button("Cancel"))
+            {
+                mShowSetParamForAllHoursAndWeathersWindow = false;
+            }
         }
+        ImGui::End();
+    }
+}
+
+void TimecycEditor::DrawLicensesWindow()
+{
+    if(mShowLicensesWindow)
+    {
+        ImGui::Begin("Licenses", &mShowLicensesWindow);
+
+        ImGui::SeparatorText("Hooking.Patterns");
+        static const char* HookingPatternsLicense = 
+R"(Copyright (c) 2014 Bas Timmer/NTAuthority et al.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.)";
+        ImGui::Text(HookingPatternsLicense);
+
+
+        ImGui::SeparatorText("ImGui");
+        static const char* ImGuiLicense = 
+R"(The MIT License (MIT)
+
+Copyright (c) 2014-2023 Omar Cornut
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+)";
+        ImGui::Text(ImGuiLicense);
+
+
+        ImGui::SeparatorText("injector");
+        ImGui::Text("Copyright (C) 2012-2014 LINK/2012 <dma_2012@hotmail.com>");
+
         ImGui::End();
     }
 }
