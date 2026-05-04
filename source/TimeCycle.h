@@ -6,19 +6,19 @@ namespace rage
 {
     struct SkyHatPerFrameSettings
     {
-        float m_fSkyColor[3];
+        Color3f m_SkyColor;
         float field_C;
-        float m_fSkyHorizonColor[3];
+        Color3f m_SkyHorizonColor;
         float field_1C;
-        float m_fSkyEastHorizonColor[3];
+        Color3f m_SkyEastHorizonColor;
         float field_2C;
-        float m_fSunsetColor[3];
+        Color3f m_SunsetColor;
         float m_fUnknown_3C; // unused
         float m_fSkyHorizonHeight;
         float m_fSkyHorizonBrightness;
         float m_fSunAxisX;
         float m_fSunAxisY;
-        float m_fCloudColor[3];
+        Color3f m_CloudColor;
         float field_5C;
         float m_fCloud2ShadowStrength;
         float m_fCloud2Threshold;
@@ -36,11 +36,11 @@ namespace rage
         float m_fCloud1Threshold;
         float m_fCloud1Height;
         float field_9C;
-        float m_fTopCloudColor[3];
+        Color3f m_TopCloudColor;
         float field_AC;
         float m_fTopCloudLight;
         float field_B4[3];
-        float m_fSunColor[3];
+        Color3f m_SunColor;
         float field_CC;
         float m_fUnderlighting;
         float m_fDetailNoiseOffset;
@@ -48,7 +48,7 @@ namespace rage
         float m_fStarFieldThreshold;
         float m_fMoonBrightness;
         float field_E4[3];
-        float m_fMoonColor[3];
+        Color3f m_MoonColor;
         float field_FC;
         float m_fMoonGlow;
         float m_fMoonTransparency;

@@ -2,6 +2,13 @@
 
 #include <cstdint>
 
+struct Color3f
+{
+    float Red;
+    float Green;
+    float Blue;
+};
+
 struct Colorf
 {
     float Red;

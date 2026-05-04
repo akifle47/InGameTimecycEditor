@@ -102,21 +102,21 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
             file << (int32_t)m_ColourSets[time][weather].m_fTemperature << "    ";
             file << m_ColourSets[time][weather].m_fGlobalReflectionMultiplier << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Blue) << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Blue) << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Blue) << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Blue) << "    ";
 
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fUnknown_3C << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonHeight << "    ";
@@ -124,9 +124,9 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
             file << unusedParam << "    ";
             file << unusedParam << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Blue) << "    ";
 
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud2ShadowStrength << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud2Threshold << "    ";
@@ -144,15 +144,15 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud1Threshold << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud1Height << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Blue) << "    ";
 
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudLight << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Blue) << "    ";
 
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fUnderlighting << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fDetailNoiseOffset << "    ";
@@ -160,9 +160,9 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fStarFieldThreshold << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonBrightness << "    ";
 
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[0]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[1]) << " ";
-            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[2]) << "    ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Red) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Green) << " ";
+            file << (m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Blue) << "    ";
 
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonGlow << "    ";
             file << m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonTransparency << "    ";
@@ -293,31 +293,30 @@ bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
             currLineSS >> m_ColourSets[time][weather].m_fTemperature;
             currLineSS >> m_ColourSets[time][weather].m_fGlobalReflectionMultiplier;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyColor.Blue;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyHorizonColor.Blue;
             
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyEastHorizonColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SkyEastHorizonColor.Blue;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunsetColor[2];
-
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunsetColor.Blue;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fUnknown_3C;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonHeight;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSkyHorizonBrightness;
 
             currLineSS >> tempUnusedParam >> tempUnusedParam;
             
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloudColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_CloudColor.Blue;
 
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud2ShadowStrength;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud2Threshold;
@@ -335,15 +334,15 @@ bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud1Threshold;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fCloud1Height;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_TopCloudColor.Blue;
 
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fTopCloudLight;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fSunColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_SunColor.Blue;
 
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fUnderlighting;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fDetailNoiseOffset;
@@ -351,9 +350,9 @@ bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fStarFieldThreshold;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonBrightness;
 
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[0];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[1];
-            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonColor[2];
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Red;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Green;
+            currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_MoonColor.Blue;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonGlow;
             currLineSS >> m_ColourSets[time][weather].m_SkyHatSettings.m_fMoonTransparency;
 

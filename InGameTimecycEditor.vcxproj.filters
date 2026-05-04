@@ -62,7 +62,7 @@
     <ClCompile Include="source\TimecycEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Timecycle.cpp">
+    <ClCompile Include="source\TimeCycle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\imgui_dx9_backend\imgui_impl_dx9_shader.cpp">

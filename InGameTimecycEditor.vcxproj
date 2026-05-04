@@ -36,7 +36,7 @@
     <ClCompile Include="source\imgui_dx9_backend\imgui_impl_dx9_shader.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\TimecycEditor.cpp" />
-    <ClCompile Include="source\Timecycle.cpp" />
+    <ClCompile Include="source\TimeCycle.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

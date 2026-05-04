@@ -49,6 +49,11 @@ HRESULT __stdcall DInput8DeviceGetDeviceStateH(IDirectInputDevice8 *This, DWORD 
         {
             This->Unacquire();
         }
+        else if(cbData == 256 && ((uint8_t*)lpvData)[DIK_LCONTROL] != 0)
+        {
+            uint8_t* key = &((uint8_t*)lpvData)[DIK_LCONTROL];
+            *key = 0;
+        }
     }
 
     return hr;
