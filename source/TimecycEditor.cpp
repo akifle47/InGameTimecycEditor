@@ -149,6 +149,29 @@ void TimecycEditor::Initialize()
     mTimecycParamNameOffsetAndType[79] = {"Film Grain", 0x20C, TIMECYCPARAMTYPE_INT};
 }
 
+void TimecycEditor::ReCreateFont()
+{
+    ImFontConfig conf = {};
+    conf.SizePixels = 13.0f * mFontScale;
+    conf.OversampleH = 2;
+    conf.OversampleV = 2;
+
+    static const ImWchar ranges[] =
+    {
+        0x0020, 0x00FF, // Basic Latin + Latin Supplement
+        0,
+    };
+    const ImWchar* glyph_ranges = ranges;
+
+    auto& io = ImGui::GetIO();
+    io.Fonts->Clear();
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(gCousineRegularCompressedDataBase85, conf.SizePixels, &conf, glyph_ranges);
+    io.Fonts->Build();
+
+    ImGui_ImplDX9_InvalidateDeviceObjects();
+    ImGui_ImplDX9_CreateDeviceObjects();
+}
+
 void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
 {
     if(!mIsImGuiInitialized)
@@ -181,7 +204,6 @@ void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
 
             style->WindowTitleAlign.x = 0.5;
             style->WindowTitleAlign.y = 0.5;
-            style->WindowMenuButtonPosition = 0;
 
             style->SeparatorTextBorderSize = 3;
         }
@@ -246,20 +268,7 @@ void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
         ImGui_ImplWin32_Init(creationParams.hFocusWindow);
         ImGui_ImplDX9_Init(d3d9Device);
 
-        ImFontConfig conf = {};
-        conf.SizePixels = 13;
-        conf.OversampleH = 2;
-        conf.OversampleV = 2;
-
-        static const ImWchar ranges[] =
-        {
-            0x0020, 0x00FF, // Basic Latin + Latin Supplement
-            0,
-        };
-        const ImWchar* glyph_ranges = ranges;
-
-        io.Fonts->AddFontFromMemoryCompressedBase85TTF(gCousineRegularCompressedDataBase85, conf.SizePixels, &conf, glyph_ranges);
-        io.FontGlobalScale = mFontScale;
+        ReCreateFont();
 
         mIsImGuiInitialized = true;
     }
@@ -403,6 +412,13 @@ void TimecycEditor::Update()
 
             ForceWeather(mSelectedWeather);
         }
+
+        static float prevFontScale = mFontScale;
+        if(mFontScale != prevFontScale)
+        {
+            ReCreateFont();
+            prevFontScale = mFontScale;
+        }
     }
     
     bool windowWasJustClosed = prevShowWindow && !mShowWindow;
@@ -464,7 +480,7 @@ void TimecycEditor::DrawMainWindow()
     const char *weatherNames[TimeCycle::NUM_WEATHERS - 1] = {"EXTRASUNNY", "SUNNY", "SUNNY_WINDY", "CLOUDY", "RAIN", "DRIZZLE", "FOGGY", "LIGHTNING"};
     const char *weatherName = weatherNames[mSelectedWeather];
 
-    ImGui::Begin("TimeCycle Editor 1.21", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+    ImGui::Begin("TimeCycle Editor 1.3", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
     ImGui::SetWindowPos(mWindowPos);
     ImGui::SetWindowSize(mWindowSize);
 
@@ -1009,14 +1025,23 @@ void TimecycEditor::DrawMainWindow()
     ImGui::End();
 }
 
+void CenterNextWindow()
+{
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+}
+
 void TimecycEditor::DrawSaveWindow()
 {
     if(mShowSaveWindow)
     {
+        CenterNextWindow();
+
         static char errorMessage[256];
         static char fileName[256] = "filename.dat";
 
-        ImGui::Begin("Save As");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+        ImGui::Begin("Save As", &mShowSaveWindow, ImGuiWindowFlags_AlwaysAutoResize);
         {
             ImGui::InputText("##fileName", fileName, 256);
 
@@ -1038,6 +1063,7 @@ void TimecycEditor::DrawSaveWindow()
             ImGui::Text(errorMessage);
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 }
 
@@ -1045,10 +1071,13 @@ void TimecycEditor::DrawLoadWindow()
 {
     if(mShowLoadWindow)
     {
+        CenterNextWindow();
+
         static char errorMessage[256];
         static char fileName[256] = "filename.dat";
 
-        ImGui::Begin("Load From");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+        ImGui::Begin("Load From", &mShowLoadWindow, ImGuiWindowFlags_AlwaysAutoResize);
         {
             ImGui::InputText("##fileName", fileName, 256);
 
@@ -1070,6 +1099,7 @@ void TimecycEditor::DrawLoadWindow()
             ImGui::Text(errorMessage);
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 }
 
@@ -1077,20 +1107,17 @@ void TimecycEditor::DrawSettingsWindow()
 {
     if(mShowSettingsWindow)
     {
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        CenterNextWindow();
 
-        ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16, 16));
+        ImGui::Begin("Settings", &mShowSettingsWindow, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
         {
-            ImGui::SetWindowSize(ImVec2(330.0f, 345.0f));
-
             ImGui::Text("Position");
             ImGui::DragFloat2("##Position", (float*)&mWindowPos, 1.0f, 0.0f, FLT_MAX);
             ImGui::Text("Size");
             ImGui::DragFloat2("##Size", (float*)&mWindowSize, 1.0f, 1.0f, FLT_MAX);
             ImGui::Text("Font Scale");
-            ImGui::DragFloat("##Font Scale", &mFontScale, 0.001f, 0.1f, 2.0f);
-            ImGui::Text("Item Inner Spacing");
+            ImGui::DragFloat("##Font Scale", &mFontScale, 0.01f, 0.1f, 2.0f);
 
             ImGui::GetIO().FontGlobalScale = mFontScale;
 
@@ -1179,6 +1206,7 @@ void TimecycEditor::DrawSettingsWindow()
             }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 }
 
@@ -1186,13 +1214,11 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
 {
     if(mShowSetParamForAllHoursAndWeathersWindow)
     {
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        CenterNextWindow();
 
-        ImGui::Begin("Set Param For All Hours And Weathers", &mShowSetParamForAllHoursAndWeathersWindow, ImGuiWindowFlags_NoResize);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(48, 11));
+        ImGui::Begin("Set Param For All Hours And Weathers", &mShowSetParamForAllHoursAndWeathersWindow, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
         {
-            ImGui::SetWindowSize(ImVec2(330.0f, 165.0f));
-
             static int currentItemIndex = 0;
 
             ImGui::Text("Parameter");
@@ -1304,6 +1330,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
             }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 }
 
@@ -1311,6 +1338,8 @@ void TimecycEditor::DrawLicensesWindow()
 {
     if(mShowLicensesWindow)
     {
+        CenterNextWindow();
+
         ImGui::Begin("Licenses", &mShowLicensesWindow);
 
         ImGui::SeparatorText("Hooking.Patterns");

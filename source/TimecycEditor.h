@@ -34,6 +34,8 @@ private:
     void SaveSettings();
     void LoadSettings();
 
+    void ReCreateFont();
+
     void DrawMainWindow();
     void DrawSaveWindow();
     void DrawLoadWindow();
