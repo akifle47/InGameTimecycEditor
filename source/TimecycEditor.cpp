@@ -464,7 +464,7 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
         DrawSaveWindow();
         DrawLoadWindow();
         DrawSettingsWindow();
-        DrawSetParamForAllHoursAndWeathersWindow();
+        DrawSetParamOnAllHoursAndWeathersWindow();
         DrawLicensesWindow();
     }
 
@@ -523,9 +523,9 @@ void TimecycEditor::DrawMainWindow()
 
         if(ImGui::BeginMenu("Other"))
         {
-            if(ImGui::MenuItem("Set Param For All Hours And Weathers"))
+            if(ImGui::MenuItem("Set Param On All Hours And Weathers"))
             {
-                mShowSetParamForAllHoursAndWeathersWindow = true;
+                mShowSetParamOnAllHoursAndWeathersWindow = true;
             }
 
             if(ImGui::MenuItem("Licenses"))
@@ -1210,14 +1210,14 @@ void TimecycEditor::DrawSettingsWindow()
     }
 }
 
-void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
+void TimecycEditor::DrawSetParamOnAllHoursAndWeathersWindow()
 {
-    if(mShowSetParamForAllHoursAndWeathersWindow)
+    if(mShowSetParamOnAllHoursAndWeathersWindow)
     {
         CenterNextWindow();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(48, 11));
-        ImGui::Begin("Set Param For All Hours And Weathers", &mShowSetParamForAllHoursAndWeathersWindow, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Set Param On All Hours And Weathers", &mShowSetParamOnAllHoursAndWeathersWindow, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
         {
             static int currentItemIndex = 0;
 
@@ -1259,7 +1259,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
                             }
                         }
 
-                        mShowSetParamForAllHoursAndWeathersWindow = false;
+                        mShowSetParamOnAllHoursAndWeathersWindow = false;
                     }
                 break;
 
@@ -1280,7 +1280,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
                             }
                         }
 
-                        mShowSetParamForAllHoursAndWeathersWindow = false;
+                        mShowSetParamOnAllHoursAndWeathersWindow = false;
                     }
                 break;
 
@@ -1299,7 +1299,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
                             }
                         }
 
-                        mShowSetParamForAllHoursAndWeathersWindow = false;
+                        mShowSetParamOnAllHoursAndWeathersWindow = false;
                     }
                 break;
 
@@ -1318,7 +1318,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
                             }
                         }
 
-                        mShowSetParamForAllHoursAndWeathersWindow = false;
+                        mShowSetParamOnAllHoursAndWeathersWindow = false;
                     }
                 break;
             }
@@ -1326,7 +1326,7 @@ void TimecycEditor::DrawSetParamForAllHoursAndWeathersWindow()
             ImGui::SameLine();
             if(ImGui::Button("Cancel"))
             {
-                mShowSetParamForAllHoursAndWeathersWindow = false;
+                mShowSetParamOnAllHoursAndWeathersWindow = false;
             }
         }
         ImGui::End();
