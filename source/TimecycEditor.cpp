@@ -617,7 +617,7 @@ void TimecycEditor::DrawMainWindow()
         mSelectedHour = TimecycTimeIndexToGameTime(mSelectedHourIndex);
 
         ImGui::Text("Time of Day");
-        ImGui::SliderInt("##Hour", &mSelectedHourIndex, 0, TimeCycle::NUM_HOURS - 1, timeOfDayName);
+        ImGui::SliderInt("##Hour", &mSelectedHourIndex, 0, TimeCycle::NUM_HOURS - 1, timeOfDayName, ImGuiSliderFlags_NoInput);
 
         buttonWidth = ImGui::GetItemRectSize().x * 0.5f;
     }
@@ -633,11 +633,11 @@ void TimecycEditor::DrawMainWindow()
 
         buttonWidth = ImGui::GetItemRectSize().x * 0.5f;
     }
-    
-    ImGui::SliderInt("##Minutes", &mSelectedMinutes, 0, 59);
+
+    ImGui::SliderInt("##Minutes", &mSelectedMinutes, 0, 59, "%d");
 
     ImGui::Text("Weather");
-    ImGui::SliderInt("##Weather", &mSelectedWeather, 0, TimeCycle::NUM_WEATHERS - 2, weatherName);
+    ImGui::SliderInt("##Weather", &mSelectedWeather, 0, TimeCycle::NUM_WEATHERS - 2, weatherName, ImGuiSliderFlags_NoInput);
 
     ImGui::NewLine();
 
