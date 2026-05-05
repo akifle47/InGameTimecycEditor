@@ -475,7 +475,7 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
 
 void TimecycEditor::DrawMainWindow()
 {
-    const char *timeOfDayNames[TimeCycle::NUM_HOURS] = {"Midnight", "5AM", "6AM", "7AM", "9AM", "Midday", "18PM", "19PM", "20PM", "21PM", "22PM"};
+    const char *timeOfDayNames[TimeCycle::NUM_HOURS] = {"Midnight", "5AM", "6AM", "7AM", "9AM", "Midday", "6PM", "7PM", "8PM", "9PM", "10PM"};
     const char *timeOfDayName = timeOfDayNames[mSelectedHourIndex];
     const char *weatherNames[TimeCycle::NUM_WEATHERS - 1] = {"EXTRASUNNY", "SUNNY", "SUNNY_WINDY", "CLOUDY", "RAIN", "DRIZZLE", "FOGGY", "LIGHTNING"};
     const char *weatherName = weatherNames[mSelectedWeather];
