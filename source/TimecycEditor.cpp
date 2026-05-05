@@ -13,6 +13,17 @@
 #include <stack>
 #include <functional>
 
+std::unordered_map<std::string, Colorf> sColorsAsFloat;
+
+static const char* AMBIENT_LIGHT_0_COLOR_ID   = "##AMBIENT_LIGHT_0_COLOR";
+static const char* AMBIENT_LIGHT_1_COLOR_ID   = "##AMBIENT_LIGHT_1_COLOR";
+static const char* DIRECTIONAL_LIGHT_COLOR_ID = "##DIRECTIONAL_LIGHT_COLOR";
+static const char* FOG_COLOR_ID               = "##FOG_COLOR";
+static const char* COLOR_CORRECT_ID           = "##COLOR_CORRECT";
+static const char* COLOR_ADD_ID               = "##COLOR_ADD";
+static const char* WATER_COLOR_ID             = "##WATER_COLOR";
+
+
 struct UndoRedoAction
 {
     std::function<void()> Undo;
@@ -29,6 +40,7 @@ void PushUndo(std::function<void()> undo, std::function<void()> redo)
     while (!sRedoStack.empty())
         sRedoStack.pop();
 }
+
 
 void TimecycEditor::Initialize()
 {
@@ -66,6 +78,7 @@ void TimecycEditor::Initialize()
 
     LoadSettings();
     TimeCycle::Load("pc/data/timecyc.dat", nullptr, 0);
+    ReSetFloatColors();
 
     mTimecycParamNameOffsetAndType[0] = {"Ambient Color 0", 0x0, TIMECYCPARAMTYPE_COLOR_U32};
     mTimecycParamNameOffsetAndType[1] = {"Ambient Color 1", 0x4, TIMECYCPARAMTYPE_COLOR_U32};
@@ -147,6 +160,23 @@ void TimecycEditor::Initialize()
     mTimecycParamNameOffsetAndType[77] = {"Sun Size", 0x1F0, TIMECYCPARAMTYPE_FLOAT};
     mTimecycParamNameOffsetAndType[78] = {"Sky Brightness", 0x204, TIMECYCPARAMTYPE_FLOAT};
     mTimecycParamNameOffsetAndType[79] = {"Film Grain", 0x20C, TIMECYCPARAMTYPE_INT};
+}
+
+void TimecycEditor::ReSetFloatColors()
+{
+    for(uint32_t time = 0; time < TimeCycle::NUM_HOURS; time++)
+    {
+        for(uint32_t weather = 0; weather < TimeCycle::NUM_WEATHERS; weather++)
+        {
+            sColorsAsFloat[AMBIENT_LIGHT_0_COLOR_ID]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient0Color);
+            sColorsAsFloat[AMBIENT_LIGHT_1_COLOR_ID]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient1Color);
+            sColorsAsFloat[DIRECTIONAL_LIGHT_COLOR_ID] = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_DirLightColor);
+            sColorsAsFloat[FOG_COLOR_ID]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_FogColorDensity);
+            sColorsAsFloat[COLOR_CORRECT_ID]           = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorCorrection);
+            sColorsAsFloat[COLOR_ADD_ID]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorAdd);
+            sColorsAsFloat[WATER_COLOR_ID]             = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Water);
+        }
+    }
 }
 
 void TimecycEditor::ReCreateFont()
@@ -491,6 +521,7 @@ void TimecycEditor::DrawMainWindow()
             if(ImGui::MenuItem("timecyc.dat##Load"))
             {
                 TimeCycle::Load("pc/data/timecyc.dat", nullptr, 0);
+                ReSetFloatColors();
             }
             if(ImGui::MenuItem("Load From"))
             {
@@ -614,7 +645,7 @@ void TimecycEditor::DrawMainWindow()
     {
         static std::unordered_map<std::string, Color32> sPrevValues;
 
-        Colorf colorf = ColorfFromColor32(color);
+        Colorf& colorf = sColorsAsFloat[label];
         ImGui::ColorEdit3(label, &colorf.Red, flags);
 
         if(ImGui::IsItemActivated())
@@ -656,7 +687,7 @@ void TimecycEditor::DrawMainWindow()
     {
         static std::unordered_map<std::string, Color32> sPrevValues;
 
-        Colorf colorf = ColorfFromColor32(color);
+        Colorf& colorf = sColorsAsFloat[label];
         ImGui::ColorEdit4(label, &colorf.Red, flags);
 
         if(ImGui::IsItemActivated())
@@ -714,7 +745,7 @@ void TimecycEditor::DrawMainWindow()
         ImGui::SeparatorText("Ambient Light 0");
         {
             ImGui::Text("Color");
-            ColorEdit3("##Ambient Light 0 Color", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Ambient0Color);
+            ColorEdit3(AMBIENT_LIGHT_0_COLOR_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Ambient0Color);
 
             ImGui::Text("Multiplier");
             DragFloat("##Ambient Light 0 Multiplier", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fAmbient0Multiplier, 0.005f, 0.0f, FLT_MAX);
@@ -722,7 +753,7 @@ void TimecycEditor::DrawMainWindow()
         ImGui::SeparatorText("Ambient Light 1");
         {
             ImGui::Text("Color");
-            ColorEdit3("##Ambient Light 1 Color", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Ambient1Color);
+            ColorEdit3(AMBIENT_LIGHT_1_COLOR_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Ambient1Color);
 
             ImGui::Text("Multiplier");
             DragFloat("##Ambient Light 1 Multiplier", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fAmbient1Multiplier, 0.005f, 0.0f, FLT_MAX);
@@ -730,7 +761,7 @@ void TimecycEditor::DrawMainWindow()
         ImGui::SeparatorText("Directional Light");
         {
             ImGui::Text("Color");
-            ColorEdit3("##Directional Light Color", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_DirLightColor);
+            ColorEdit3(DIRECTIONAL_LIGHT_COLOR_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_DirLightColor);
 
             ImGui::Text("Multiplier");
             DragFloat("##Directional Light multiplier", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fDirLightMultiplier, 0.005f, 0.0f, FLT_MAX);
@@ -741,7 +772,7 @@ void TimecycEditor::DrawMainWindow()
         ImGui::SeparatorText("Water");
         {
             ImGui::Text("Color");
-            ColorEdit4("##Water Color", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Water);
+            ColorEdit4(WATER_COLOR_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_Water);
 
             ImGui::Text("Reflection Multiplier");
             DragFloat("##Water Reflection Multiplier", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fWaterReflectionMultiplier, 0.005f, 0.0f, FLT_MAX);
@@ -790,7 +821,7 @@ void TimecycEditor::DrawMainWindow()
             DragFloat("##Fog Start", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fFogStart, 0.5f);
 
             ImGui::Text("Color");
-            ColorEdit3("##Fog Color", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_FogColorDensity);
+            ColorEdit3(FOG_COLOR_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_FogColorDensity);
 
             float density = (float)TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_FogColorDensity.Alpha / 255.0f;
             ImGui::Text("Density");
@@ -946,10 +977,10 @@ void TimecycEditor::DrawMainWindow()
         DragFloat("##Exposure", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fExposure, 0.001f, 0.0f, FLT_MAX);
 
         ImGui::Text("Color Correction");
-        ColorEdit3("##Color Correction", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_ColorCorrection);
+        ColorEdit3(COLOR_CORRECT_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_ColorCorrection);
 
         ImGui::Text("Color Add");
-        ColorEdit3("##Color Add", TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_ColorAdd);
+        ColorEdit3(COLOR_ADD_ID, TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_ColorAdd);
 
         ImGui::Text("Bloom Threshold");
         DragFloat("##Bloom Threshold", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_fBloomThreshold, 0.005f, 0.0f, FLT_MAX);
@@ -1086,6 +1117,7 @@ void TimecycEditor::DrawLoadWindow()
                 if(TimeCycle::Load(fileName, errorMessage, 256))
                 {
                     mShowLoadWindow = false;
+                    ReSetFloatColors();
                 }
             }
 
@@ -1259,6 +1291,7 @@ void TimecycEditor::DrawSetParamOnAllHoursAndWeathersWindow()
                             }
                         }
 
+                        ReSetFloatColors();
                         mShowSetParamOnAllHoursAndWeathersWindow = false;
                     }
                 break;
