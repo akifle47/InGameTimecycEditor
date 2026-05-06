@@ -131,5 +131,58 @@ public:
     };
     static_assert(sizeof(CColourSet) == 0x210);
 
+    struct CTimeCycleModifier
+    {
+        uint32_t m_Hash;
+        float m_fMinFarClip;
+        float m_fMaxFarClip;
+        float m_fMaxFarDof;
+        float m_fMinNearDof;
+        float m_fMidBlur;
+        float m_fFarBlur;
+        float m_fMinFogStart;
+        float m_fMaxFogStart;
+        Color32 m_AmbientColor0;
+        float m_fAmbientColor0Multiplier;
+        Color32 m_AmbientColor1;
+        float m_fAmbientColor1Multiplier;
+        float m_fAoMultiplier;
+        float m_fNearFogColorMultiplier;
+        float m_fSkyMultiplier;
+        Color32 m_DirectionalLightColor;
+        float m_fDirectionalLightColorMultiplier;
+        float m_fAmbientScale;
+        Color32 m_FogColor;
+        Color32 m_NearFogColor;
+        int8_t m_Unknown;
+        Color32 m_NearFogAxis;
+        float m_fMinFarDof;
+        float m_fPedAoMultiplier;
+        float m_fTemperature;
+        float m_fWaterReflectionMultiplier;
+        float m_fParticleIntensity;
+        float m_fPostFxStrength;
+        float m_fExposure;
+        float m_fExposureMultiplier;
+        float m_fBloomThreshold;
+        float m_fMidGray;
+        float m_fBloomIntensity;
+        uint8_t m_ColorCorrect[3];
+        uint8_t m_ColorAdd[3];
+        float m_fDesaturation;
+        float m_fContrast;
+        float m_fGamma;
+        float m_fDesaturationFar;
+        float m_fContrastFar;
+        float m_fGammaFar;
+        float m_fDepthFxNear;
+        float m_fDepthFxFar;
+        float m_fLumMin;
+        float m_fLumAdapt;
+        float m_fGlobalReflectionMultiplier;
+    };
+    static_assert(sizeof(CTimeCycleModifier) == 0xBC);
+
+public:
     static inline CColourSet (*m_ColourSets)[NUM_WEATHERS];
 };

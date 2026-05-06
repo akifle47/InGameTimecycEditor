@@ -13,7 +13,7 @@
 #include <stack>
 #include <functional>
 
-std::unordered_map<std::string, Colorf> sColorsAsFloat;
+std::unordered_map<std::string, std::array<Colorf, TimeCycle::NUM_HOURS * TimeCycle::NUM_WEATHERS>> sColorsAsFloat;
 
 static const char* AMBIENT_LIGHT_0_COLOR_ID   = "##AMBIENT_LIGHT_0_COLOR";
 static const char* AMBIENT_LIGHT_1_COLOR_ID   = "##AMBIENT_LIGHT_1_COLOR";
@@ -168,13 +168,13 @@ void TimecycEditor::ReSetFloatColors()
     {
         for(uint32_t weather = 0; weather < TimeCycle::NUM_WEATHERS; weather++)
         {
-            sColorsAsFloat[AMBIENT_LIGHT_0_COLOR_ID]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient0Color);
-            sColorsAsFloat[AMBIENT_LIGHT_1_COLOR_ID]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient1Color);
-            sColorsAsFloat[DIRECTIONAL_LIGHT_COLOR_ID] = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_DirLightColor);
-            sColorsAsFloat[FOG_COLOR_ID]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_FogColorDensity);
-            sColorsAsFloat[COLOR_CORRECT_ID]           = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorCorrection);
-            sColorsAsFloat[COLOR_ADD_ID]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorAdd);
-            sColorsAsFloat[WATER_COLOR_ID]             = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Water);
+            sColorsAsFloat[AMBIENT_LIGHT_0_COLOR_ID][time * TimeCycle::NUM_WEATHERS + weather]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient0Color);
+            sColorsAsFloat[AMBIENT_LIGHT_1_COLOR_ID][time * TimeCycle::NUM_WEATHERS + weather]   = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Ambient1Color);
+            sColorsAsFloat[DIRECTIONAL_LIGHT_COLOR_ID][time * TimeCycle::NUM_WEATHERS + weather] = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_DirLightColor);
+            sColorsAsFloat[FOG_COLOR_ID][time * TimeCycle::NUM_WEATHERS + weather]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_FogColorDensity);
+            sColorsAsFloat[COLOR_CORRECT_ID][time * TimeCycle::NUM_WEATHERS + weather]           = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorCorrection);
+            sColorsAsFloat[COLOR_ADD_ID][time * TimeCycle::NUM_WEATHERS + weather]               = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_ColorAdd);
+            sColorsAsFloat[WATER_COLOR_ID][time * TimeCycle::NUM_WEATHERS + weather]             = ColorfFromColor32(TimeCycle::m_ColourSets[time][weather].m_Water);
         }
     }
 }
@@ -641,11 +641,11 @@ void TimecycEditor::DrawMainWindow()
 
     ImGui::NewLine();
 
-    auto ColorEdit3 = [](const char* label, Color32& color, ImGuiColorEditFlags flags = 0)
+    auto ColorEdit3 = [this](const char* label, Color32& color, ImGuiColorEditFlags flags = 0)
     {
         static std::unordered_map<std::string, Color32> sPrevValues;
 
-        Colorf& colorf = sColorsAsFloat[label];
+        Colorf& colorf = sColorsAsFloat[label][mSelectedHourIndex * TimeCycle::NUM_WEATHERS + mSelectedWeather];
         ImGui::ColorEdit3(label, &colorf.Red, flags);
 
         if(ImGui::IsItemActivated())
@@ -683,11 +683,11 @@ void TimecycEditor::DrawMainWindow()
         }
     };
 
-    auto ColorEdit4 = [](const char* label, Color32& color, ImGuiColorEditFlags flags = 0)
+    auto ColorEdit4 = [this](const char* label, Color32& color, ImGuiColorEditFlags flags = 0)
     {
         static std::unordered_map<std::string, Color32> sPrevValues;
 
-        Colorf& colorf = sColorsAsFloat[label];
+        Colorf& colorf = sColorsAsFloat[label][mSelectedHourIndex * TimeCycle::NUM_WEATHERS + mSelectedWeather];
         ImGui::ColorEdit4(label, &colorf.Red, flags);
 
         if(ImGui::IsItemActivated())
@@ -1053,6 +1053,7 @@ void TimecycEditor::DrawMainWindow()
         ImGui::DragFloat("##Unknown 29", &TimeCycle::m_ColourSets[mSelectedHourIndex][mSelectedWeather].m_SkyHatSettings.m_fTopCloudLight, 0.1f);
     }
     */
+
     ImGui::End();
 }
 
