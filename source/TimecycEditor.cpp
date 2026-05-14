@@ -411,7 +411,7 @@ void TimecycEditor::Update()
     
     if(mShowWindow)
     {
-        if(ImGui::IsKeyPressed(mToggleCameraControlKey))
+        if(mToggleCameraControlKey != ImGuiKey_None && ImGui::IsKeyPressed(mToggleCameraControlKey))
         {
             mDisableMouseControl = !mDisableMouseControl;
         }

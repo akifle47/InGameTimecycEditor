@@ -73,6 +73,18 @@ HRESULT __stdcall DInput8DeviceAcquireH(IDirectInputDevice8 *This)
 HWND(__cdecl* grcDevice__CreateDeviceWindowO)() = nullptr;
 HWND grcDevice__CreateDeviceWindowH()
 {
+    // D3D9 hooks
+    auto pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? 8B 0D ? ? ? ? 8B 51");
+    if(pattern.empty())
+        pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? A1 ? ? ? ? 68 ? ? ? ? ? ? 6A");
+    uint32_t* d3d9_vft = **(uint32_t***)pattern.get_first(6);
+
+    D3D9DeviceEndSceneO = (decltype(D3D9DeviceEndSceneO))d3d9_vft[42];
+    injector::WriteMemory(&d3d9_vft[42], (uint32_t)D3D9DeviceEndSceneH, true);
+
+    D3D9DeviceResetO = (decltype(D3D9DeviceResetO))d3d9_vft[16];
+    injector::WriteMemory(&d3d9_vft[16], (uint32_t)D3D9DeviceResetH, true);
+
     HWND hwnd = grcDevice__CreateDeviceWindowO();
     WndProcO = (WNDPROC)SetWindowLongPtr(hwnd, GWL_WNDPROC, (LONG_PTR)WndProcH);
 
@@ -122,22 +134,9 @@ bool Initialize()
     dinput8->Release();
     dinput8Device->Release();
 
-    // D3D9 hooks
-
-    auto pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? 8B 0D ? ? ? ? 8B 51");
-    if(pattern.empty())
-        pattern = hook::pattern("C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? A1 ? ? ? ? 68 ? ? ? ? ? ? 6A");
-    uint32_t* d3d9_vft = **(uint32_t***)pattern.get_first(6);
-
-    D3D9DeviceEndSceneO = (decltype(D3D9DeviceEndSceneO))d3d9_vft[42];
-    d3d9_vft[42] = (uint32_t)D3D9DeviceEndSceneH;
-
-    D3D9DeviceResetO = (decltype(D3D9DeviceResetO))d3d9_vft[16];
-    d3d9_vft[16] = (uint32_t)D3D9DeviceResetH;
-
     // wom
 
-    pattern = hook::pattern("E8 ? ? ? ? A3 ? ? ? ? A1 ? ? ? ? C6 05");
+    auto pattern = hook::pattern("E8 ? ? ? ? A3 ? ? ? ? A1 ? ? ? ? C6 05");
     if(pattern.empty())
     {
         pattern = hook::pattern("E8 ? ? ? ? A3 ? ? ? ? C6 05 ? ? ? ? ? A1");
