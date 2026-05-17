@@ -63,13 +63,19 @@ static_assert(sizeof(rage::SkyHatPerFrameSettings) == 0x118);
 struct TimeCycle
 {
 public:
+    static const char* GetModifierNameFromIndex(uint32_t modifierIndex);
+    static const char* GetModifierNameFromHash(uint32_t hash);
+
     static bool Save(const char* fileName, char* errMessage, uint32_t errMessageSize);
     static bool Load(const char* fileName, char* errMessage, uint32_t errMessageSize);
 
-public:
-    static constexpr uint32_t NUM_HOURS = 11;
-    static constexpr uint32_t NUM_WEATHERS = 9;
+    static bool SaveModifiers(char* errMessage, uint32_t errMessageSize);
+    static bool LoadModifiers(char* errMessage, uint32_t errMessageSize);
 
+private:
+    static bool SerializeModifier(const char* fileName, char* errMessage, uint32_t errMessageSize, bool writing, size_t fromIndex, size_t toindex);
+
+public:
     struct CColourSet
     {
         Color32 m_Ambient0Color;
@@ -138,26 +144,26 @@ public:
         float m_fMaxFarClip;
         float m_fMaxFarDof;
         float m_fMinNearDof;
-        float m_fMidBlur;
-        float m_fFarBlur;
+        float m_fMidDofBlur;
+        float m_fFarDofBlur;
         float m_fMinFogStart;
         float m_fMaxFogStart;
         Color32 m_AmbientColor0;
         float m_fAmbientColor0Multiplier;
         Color32 m_AmbientColor1;
         float m_fAmbientColor1Multiplier;
-        float m_fAoMultiplier;
-        float m_fNearFogColorMultiplier;
-        float m_fSkyMultiplier;
+        float m_fAoStrength;
+        float m_fPedAoStrength;
+        float m_fRimLightingMultiplier;
         Color32 m_DirectionalLightColor;
         float m_fDirectionalLightColorMultiplier;
         float m_fAmbientScale;
         Color32 m_FogColor;
         Color32 m_NearFogColor;
-        int8_t m_Unknown;
-        Color32 m_NearFogAxis;
+        uint8_t m_fNearColorStrength;
+        uint32_t m_EnableRainEffects;
         float m_fMinFarDof;
-        float m_fPedAoMultiplier;
+        float m_fSkyLightMultiplier;
         float m_fTemperature;
         float m_fWaterReflectionMultiplier;
         float m_fParticleIntensity;
@@ -165,10 +171,10 @@ public:
         float m_fExposure;
         float m_fExposureMultiplier;
         float m_fBloomThreshold;
-        float m_fMidGray;
+        float m_fMidGrayValue;
         float m_fBloomIntensity;
-        uint8_t m_ColorCorrect[3];
-        uint8_t m_ColorAdd[3];
+        ColorRGB8 m_ColorCorrect;
+        ColorRGB8 m_ColorAdd;
         float m_fDesaturation;
         float m_fContrast;
         float m_fGamma;
@@ -178,11 +184,28 @@ public:
         float m_fDepthFxNear;
         float m_fDepthFxFar;
         float m_fLumMin;
-        float m_fLumAdapt;
+        float m_fLumMax;
         float m_fGlobalReflectionMultiplier;
     };
     static_assert(sizeof(CTimeCycleModifier) == 0xBC);
 
 public:
+    static constexpr uint32_t NUM_HOURS = 11;
+    static constexpr uint32_t NUM_WEATHERS = 9;
+    static constexpr uint32_t MAX_MODIFIERS = 225;
+
     static inline CColourSet (*m_ColourSets)[NUM_WEATHERS];
+    static inline CTimeCycleModifier* m_aModifiers;
+    static inline uint32_t m_NumModifiers;
+    static inline uint32_t m_ModifierIndices[4];
+
+private:
+    static inline char m_ModifierNames[MAX_MODIFIERS][64];
+
+    static inline const char* MODIFIER_PRELUDE =
+R"(//
+// The timecyclemodifiers can be used to alter some of the timecycle settings depending on the
+// area that the camera is in.
+// There are boxes set up on the map to limit the far clip or to create an orange glow
+// Interiors/portals also use these modifiers.)";
 };

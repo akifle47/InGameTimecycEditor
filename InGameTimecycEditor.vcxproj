@@ -19,11 +19,13 @@
     <ClInclude Include="dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="source\Color.h" />
+    <ClInclude Include="source\Common.h" />
     <ClInclude Include="source\EmbeddedFont.h" />
     <ClInclude Include="source\imgui_dx9_backend\imgui_impl_dx9_shader.h" />
+    <ClInclude Include="source\StringHash.h" />
     <ClInclude Include="source\TimecycEditor.h" />
     <ClInclude Include="source\TimeCycle.h" />
-    <ClInclude Include="source\Utils.h" />
+    <ClInclude Include="source\TimecycModifierEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dependencies\Hooking.Patterns\Hooking.Patterns.cpp" />
@@ -37,6 +39,7 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\TimecycEditor.cpp" />
     <ClCompile Include="source\TimeCycle.cpp" />
+    <ClCompile Include="source\TimecycModifierEditor.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

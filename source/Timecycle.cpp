@@ -1,11 +1,120 @@
 #include "TimeCycle.h"
+#include "StringHash.h"
+
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <assert.h>
 
-void WriteColorRGB(std::ofstream& file, Color32 color)
+struct SerializationContext
+{
+    std::fstream File;
+    std::stringstream LineStream;
+    bool Writing = false;
+} gSerializationContext;
+
+inline void WriteColorRGB(std::ofstream& file, Color32 color)
 {
     file << (uint32_t)color.Red << " " << (uint32_t)color.Green << " " << (uint32_t)color.Blue << " ";
+}
+
+inline Color32 ReadColorRGB(std::stringstream& ss)
+{
+    Color32 color32;
+    uint32_t color[3];
+
+    ss >> color[0] >> color[1] >> color[2];
+    color32.Red = color[0];
+    color32.Green = color[1];
+    color32.Blue = color[2];
+    color32.Alpha = 0;
+
+    return color32;
+}
+
+inline void SerializeInt(uint8_t& value)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << (int32_t)value << "    ";
+    }
+    else
+    {
+        uint32_t temp;
+        gSerializationContext.LineStream >> temp;
+        value = temp;
+    }
+}
+
+inline void SerializeInt(int32_t& value)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << value << "    ";
+    }
+    else
+    {
+        gSerializationContext.LineStream >> value;
+    }
+}
+
+inline void SerializeInt(uint32_t& value)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << value << "    ";
+    }
+    else
+    {
+        gSerializationContext.LineStream >> value;
+    }
+}
+
+inline void SerializeFloat(float& value)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << value << "    ";
+    }
+    else
+    {
+        gSerializationContext.LineStream >> value;
+    }
+}
+
+inline void SerializeRGBA32(Color32& color)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << (uint32_t)color.Red << " " << (uint32_t)color.Green << " " << (uint32_t)color.Blue << " " << (uint32_t)color.Alpha << "    ";
+    }
+    else
+    {
+        uint32_t temp[4];
+
+        gSerializationContext.LineStream >> temp[0] >> temp[1] >> temp[2] >> temp[3];
+        color.Red   = temp[0];
+        color.Green = temp[1];
+        color.Blue  = temp[2];
+        color.Alpha = temp[3];
+    }
+}
+
+inline void SerializeRGB8(ColorRGB8& color)
+{
+    if(gSerializationContext.Writing)
+    {
+        gSerializationContext.File << (uint32_t)color.Red << " " << (uint32_t)color.Green << " " << (uint32_t)color.Blue << " " << "    ";
+    }
+    else
+    {
+        uint32_t temp[3];
+
+        gSerializationContext.LineStream >> temp[0] >> temp[1] >> temp[2];
+        color.Red   = temp[0];
+        color.Green = temp[1];
+        color.Blue  = temp[2];
+    }
 }
 
 
@@ -190,20 +299,6 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
     return true;
 }
 
-Color32 ReadColorRGB(std::stringstream& ss)
-{
-    Color32 color32;
-    uint32_t color[3];
-
-    ss >> color[0] >> color[1] >> color[2];
-    color32.Red = color[0];
-    color32.Green = color[1];
-    color32.Blue = color[2];
-    color32.Alpha = 0;
-
-    return color32;
-}
-
 bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessageSize)
 {
     std::ifstream file(fileName);
@@ -385,4 +480,194 @@ bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
     unusedParam = tempUnusedParam;
 
     return true;
+}
+
+bool TimeCycle::SerializeModifier(const char* fileName, char* errMessage, uint32_t errMessageSize, bool writing, size_t fromIndex, size_t toindex)
+{
+    gSerializationContext = {};
+
+    gSerializationContext.File = std::fstream(fileName, writing ? std::ios::out : std::ios::in);
+    gSerializationContext.Writing = writing;
+
+    if(!gSerializationContext.File.good())
+    {
+        if(errMessageSize > 0)
+        {
+            memset(errMessage, 0, errMessageSize);
+            strerror_s(errMessage, errMessageSize, errno);
+        }
+
+        return false;
+    }
+
+    std::string currLine;
+    size_t index = fromIndex;
+    size_t largestName = 0;
+    float unused = -0.0f;
+
+    if(writing)
+    {
+        gSerializationContext.File << MODIFIER_PRELUDE << '\n';
+
+        for(size_t i = fromIndex; i < toindex; i++)
+        {
+            size_t nameLen = strlen(m_ModifierNames[i]) - 1;
+            largestName = nameLen > largestName ? nameLen : largestName;
+        }
+    }
+
+    while(gSerializationContext.File)
+    {
+        if(!writing)
+        {
+            std::getline(gSerializationContext.File, currLine);
+            gSerializationContext.LineStream.clear();
+            gSerializationContext.LineStream.str(currLine);
+
+            if(currLine[0] == '/' || currLine[0] == '\0')
+                continue;
+        }
+
+        auto& modifier = m_aModifiers[index];
+
+        if(writing)
+        {
+            const char* name = m_ModifierNames[index];
+            size_t nameLen = strlen(name) - 1;
+            gSerializationContext.File << name << "    ";
+
+            if(nameLen < largestName)
+            {
+                char alignmentSpaces[32]{};
+                memset(alignmentSpaces, ' ', largestName - nameLen - 1);
+                gSerializationContext.File << alignmentSpaces;
+            }
+        }
+        else
+        {
+            gSerializationContext.LineStream >> m_ModifierNames[index];
+            modifier.m_Hash = rage::atStringHash(m_ModifierNames[index]);
+        }
+
+        uint32_t nearFogAxis;
+        if(writing)
+            nearFogAxis = modifier.m_EnableRainEffects ? 1 : 0;
+
+        SerializeFloat(modifier.m_fMinFarClip);
+        SerializeFloat(modifier.m_fMaxFarClip);
+        SerializeFloat(modifier.m_fMinFogStart);
+        SerializeFloat(modifier.m_fMaxFogStart);
+        SerializeRGBA32(modifier.m_AmbientColor0);
+        SerializeFloat(modifier.m_fAmbientColor0Multiplier);
+        SerializeRGBA32(modifier.m_AmbientColor1);
+        SerializeFloat(modifier.m_fAmbientColor1Multiplier);
+        SerializeRGBA32(modifier.m_DirectionalLightColor);
+        SerializeFloat(modifier.m_fDirectionalLightColorMultiplier);
+        SerializeFloat(modifier.m_fAmbientScale);
+        SerializeRGBA32(modifier.m_FogColor);
+        SerializeRGBA32(modifier.m_NearFogColor);
+        SerializeFloat(unused); // fog mul
+        SerializeInt(nearFogAxis);
+        SerializeFloat(modifier.m_fTemperature);
+        SerializeFloat(modifier.m_fPostFxStrength);
+        SerializeFloat(modifier.m_fExposure);
+        SerializeFloat(modifier.m_fExposureMultiplier);
+        SerializeFloat(modifier.m_fBloomThreshold);
+        SerializeFloat(modifier.m_fMidGrayValue);
+        SerializeFloat(modifier.m_fBloomIntensity);
+        SerializeRGB8(modifier.m_ColorCorrect);
+        SerializeRGB8(modifier.m_ColorAdd);
+        SerializeFloat(modifier.m_fDesaturation);
+        SerializeFloat(modifier.m_fContrast);
+        SerializeFloat(modifier.m_fGamma);
+        SerializeFloat(modifier.m_fDesaturationFar);
+        SerializeFloat(modifier.m_fContrastFar);
+        SerializeFloat(modifier.m_fGammaFar);
+        SerializeFloat(modifier.m_fDepthFxNear);
+        SerializeFloat(modifier.m_fDepthFxFar);
+        SerializeFloat(modifier.m_fLumMin);
+        SerializeFloat(modifier.m_fLumMax);
+        SerializeFloat(modifier.m_fGlobalReflectionMultiplier);
+        SerializeFloat(modifier.m_fMinFarDof);
+        SerializeFloat(modifier.m_fMaxFarDof);
+        SerializeFloat(modifier.m_fMinNearDof);
+        SerializeFloat(unused); // max near dof
+        SerializeFloat(unused); // near blur
+        SerializeFloat(unused); // max blur
+        SerializeFloat(modifier.m_fMidDofBlur);
+        SerializeFloat(modifier.m_fFarDofBlur);
+        SerializeFloat(modifier.m_fWaterReflectionMultiplier);
+        SerializeFloat(modifier.m_fParticleIntensity);
+        SerializeFloat(modifier.m_fAoStrength);
+        SerializeFloat(modifier.m_fRimLightingMultiplier);
+        SerializeFloat(modifier.m_fSkyLightMultiplier);
+        SerializeFloat(modifier.m_fPedAoStrength);
+        SerializeInt(modifier.m_fNearColorStrength);
+
+        if(!writing)
+            modifier.m_EnableRainEffects = nearFogAxis > 0;
+
+        index++;
+
+        if(!writing)
+            m_NumModifiers++;
+        if(writing && index >= toindex)
+            break;
+        if(writing)
+            gSerializationContext.File << '\n';
+    }
+
+    gSerializationContext = {};
+
+    return true;
+}
+
+bool TimeCycle::LoadModifiers(char* errMessage, uint32_t errMessageSize)
+{
+    m_NumModifiers = 0;
+    m_ModifierIndices[0] = 0;
+    if(!SerializeModifier("pc/data/timecyclemodifiers.dat", errMessage, errMessageSize, false, m_ModifierIndices[0], m_ModifierIndices[1]))
+        return false;
+    m_ModifierIndices[1] = m_NumModifiers;
+    if(!SerializeModifier("pc/data/timecyclemodifiers2.dat", errMessage, errMessageSize, false, m_ModifierIndices[1], m_ModifierIndices[2]))
+        return false;
+    m_ModifierIndices[2] = m_NumModifiers;
+    if(!SerializeModifier("pc/data/timecyclemodifiers3.dat", errMessage, errMessageSize, false, m_ModifierIndices[2], m_ModifierIndices[3]))
+        return false;
+    m_ModifierIndices[3] = m_NumModifiers;
+    if(!SerializeModifier("pc/data/timecyclemodifiers4.dat", errMessage, errMessageSize, false, m_ModifierIndices[3], m_NumModifiers))
+        return false;
+
+    return true;
+}
+
+bool TimeCycle::SaveModifiers(char* errMessage, uint32_t errMessageSize)
+{
+    if(!SerializeModifier("pc/data/timecyclemodifiers.dat", errMessage, errMessageSize, true, m_ModifierIndices[0], m_ModifierIndices[1]))
+        return false;
+    if(!SerializeModifier("pc/data/timecyclemodifiers2.dat", errMessage, errMessageSize, true, m_ModifierIndices[1], m_ModifierIndices[2]))
+        return false;
+    if(!SerializeModifier("pc/data/timecyclemodifiers3.dat", errMessage, errMessageSize, true, m_ModifierIndices[2], m_ModifierIndices[3]))
+        return false;
+    if(!SerializeModifier("pc/data/timecyclemodifiers4.dat", errMessage, errMessageSize, true, m_ModifierIndices[3], m_NumModifiers))
+        return false;
+
+    return true;
+}
+
+const char* TimeCycle::GetModifierNameFromIndex(uint32_t modifierIndex)
+{
+    assert(modifierIndex < m_NumModifiers);
+    return m_ModifierNames[modifierIndex];
+}
+
+const char* TimeCycle::GetModifierNameFromHash(uint32_t hash)
+{
+    for(size_t i = 0; i < m_NumModifiers; i++)
+    {
+        if(m_aModifiers[i].m_Hash == hash)
+            return m_ModifierNames[i];
+    }
+
+    return nullptr;
 }

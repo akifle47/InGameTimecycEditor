@@ -3,7 +3,6 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "TimeCycle.h"
-
 #include "imgui_dx9_backend/imgui_impl_dx9_shader.h"
 
 #include <tuple>

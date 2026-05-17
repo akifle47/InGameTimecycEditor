@@ -17,6 +17,13 @@ struct Colorf
     float Alpha;
 };
 
+struct ColorRGB8
+{
+    uint8_t Red;
+    uint8_t Green;
+    uint8_t Blue;
+};
+
 struct Color32
 {
     union
@@ -53,4 +60,25 @@ static inline Colorf ColorfFromColor32(Color32 color)
         .Blue  = (float)color.Blue  / 255.0f,
         .Alpha = (float)color.Alpha / 255.0f,
     };
+}
+
+static inline ColorRGB8 ColorRGB8FromColorf(Colorf color)
+{
+    ColorRGB8 color8;
+    color8.Red   = uint8_t(color.Red   * 255.0f + 0.5f);
+    color8.Green = uint8_t(color.Green * 255.0f + 0.5f);
+    color8.Blue  = uint8_t(color.Blue  * 255.0f + 0.5f);
+
+    return color8;
+}
+
+static inline Colorf ColorfFromColorRGB8(ColorRGB8 color)
+{
+   return Colorf
+   {
+        .Red   = (float)color.Red   / 255.0f,
+        .Green = (float)color.Green / 255.0f,
+        .Blue  = (float)color.Blue  / 255.0f,
+        .Alpha = 0.0f
+   };
 }
