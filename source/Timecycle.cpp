@@ -516,11 +516,12 @@ bool TimeCycle::SerializeModifier(const char* fileName, char* errMessage, uint32
         }
     }
 
-    while(gSerializationContext.File)
+    while(true)
     {
         if(!writing)
         {
-            std::getline(gSerializationContext.File, currLine);
+            if(!std::getline(gSerializationContext.File, currLine))
+                break;
             gSerializationContext.LineStream.clear();
             gSerializationContext.LineStream.str(currLine);
 
