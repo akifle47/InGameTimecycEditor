@@ -36,6 +36,8 @@ private:
     static inline void(__thiscall* BlendColorSetWithModifierO)(TimeCycle::CColourSet* pthis, TimeCycle::CTimeCycleModifier* modifier, float weight, bool a4) = nullptr;
     static inline void(__thiscall* BlendTimeCycleModifiersO)(TimeCycle::CTimeCycleModifier* pthis, TimeCycle::CTimeCycleModifier* that, float weight) = nullptr;
 
+    static inline uint32_t msSelectedModifierIndex = 0;
+
     static inline bool msLockModifier = false;
 
     static inline std::unordered_map<uint32_t, float>                   msActiveExteriorModifiers;

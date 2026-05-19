@@ -2,7 +2,6 @@
 #include "Common.h"
 #include "TimeCycle.h"
 #include "imgui.h"
-#include "Hooking.Patterns.h"
 #include "injector/injector.hpp"
 
 #include <algorithm>
@@ -17,17 +16,19 @@ static const char* COLOR_ADD_ID               = "##MOD_COLOR_ADD";
 
 void TimecycModifierEditor::Init()
 {
-    // todo: test for steam ver compatibility
-    auto pattern = hook::pattern("E8 ? ? ? ? 0F 57 C9 81 C6");
+    auto pattern = FindPattern({"E8 ? ? ? ? 0F 57 C9 81 C6",  "E8 ? ? ? ? 8B 44 24 ? 0F 57 C9"});
     BlendColorSetWithModifierO = injector::MakeCALL(pattern.get_first(0), BlendColorSetWithModifierH1).get();
-    pattern = hook::pattern("E8 ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 2A 83");
+
+    pattern = FindPattern({"E8 ? ? ? ? F3 0F 10 44 24 ? F3 0F 59 44 24 ? F3 0F 10 0D",  "E8 ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 2A 83",  "E8 ? ? ? ? 66 0F 6E 97"});
     injector::MakeCALL(pattern.get_first(0), BlendColorSetWithModifierH2);
-    pattern = hook::pattern("E8 ? ? ? ? ? ? ? ? 51 8B D1");
+
+    pattern = FindPattern({"E8 ? ? ? ? F3 0F 10 84 B4 ? ? ? ? 51",  "E8 ? ? ? ? ? ? ? ? 51 8B D1"});
     BlendTimeCycleModifiersO = injector::MakeCALL(pattern.get_first(0), BlendTimeCycleModifiersH1).get();
-    pattern = hook::pattern("E8 ? ? ? ? 0F 57 C0 0F 2F 86 ? ? ? ? 72");
+
+    pattern = FindPattern({"E8 ? ? ? ? 0F 57 C0 0F 2F 86 ? ? ? ? 72",  "E8 ? ? ? ? 8B 4C 24 ? 8B 54 24 ? 0F 57 C0"});
     injector::MakeCALL(pattern.get_first(0), BlendTimeCycleModifiersH2);
 
-    pattern = hook::pattern("89 86 ? ? ? ? 33 C9 8A AC 24");
+    pattern = FindPattern({"89 86 ? ? ? ? 33 C9 8A AC 24",  "89 86 ? ? ? ? F3 0F 11 86 ? ? ? ? 0F B6 8C 24"});
     TimeCycle::m_aModifiers = *(decltype(TimeCycle::m_aModifiers)*)pattern.get_first(2);
 
     Load();
@@ -76,8 +77,6 @@ void TimecycModifierEditor::ReSetFloatColors()
     }
 }
 
-static uint32_t sSelectedModifierIndex = 0;
-
 void TimecycModifierEditor::DrawInWindow()
 {
     static int32_t sSelectedSortedModifierIndex = -1;
@@ -98,7 +97,7 @@ void TimecycModifierEditor::DrawInWindow()
             {
                 sSelectedSortedModifierIndex = i;
                 sSelectedActiveModifierIndex = -1;
-                sSelectedModifierIndex = msSortedTimecycModifierNames[i].second;
+                msSelectedModifierIndex = msSortedTimecycModifierNames[i].second;
             }
 
             if(isSelected)
@@ -169,10 +168,15 @@ void TimecycModifierEditor::DrawInWindow()
 
                 auto& activeModifier = activeModifiers[i];
                 std::string label = activeModifier.Name + ", Weight: " + std::to_string(activeModifier.Weight);
+
+                if(activeModifier.Name == "None")
+                {
+                    ImGui::Text("None");
+                }
                 if(ImGui::Selectable(label.c_str(), sSelectedActiveModifierIndex == i, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
                 {
                     sSelectedActiveModifierIndex = i;
-                    sSelectedModifierIndex = activeModifier.Index;
+                    msSelectedModifierIndex = activeModifier.Index;
 
                     for(size_t j = 0; j < msSortedTimecycModifierNames.size(); j++)
                     {
@@ -201,9 +205,9 @@ void TimecycModifierEditor::DrawInWindow()
     {
         static std::unordered_map<std::string, Color32> sPrevValues;
         
-        std::string uniqueLabel = std::string(label) + "_" + std::to_string(sSelectedModifierIndex);
+        std::string uniqueLabel = std::string(label) + "_" + std::to_string(msSelectedModifierIndex);
 
-        Colorf* colorf = &msColorsAsFloat[label][sSelectedModifierIndex];
+        Colorf* colorf = &msColorsAsFloat[label][msSelectedModifierIndex];
         ImGui::ColorEdit4(uniqueLabel.c_str(), &colorf->Red, flags);
     
         if(ImGui::IsItemActivated())
@@ -232,9 +236,9 @@ void TimecycModifierEditor::DrawInWindow()
     {
         static std::unordered_map<std::string, ColorRGB8> sPrevValues;
 
-        std::string uniqueLabel = std::string(label) + "_" + std::to_string(sSelectedModifierIndex);
+        std::string uniqueLabel = std::string(label) + "_" + std::to_string(msSelectedModifierIndex);
 
-        Colorf* colorf = &msColorsAsFloat[label][sSelectedModifierIndex];
+        Colorf* colorf = &msColorsAsFloat[label][msSelectedModifierIndex];
         ImGui::ColorEdit3(uniqueLabel.c_str(), &colorf->Red, flags);
 
         if(ImGui::IsItemActivated())
@@ -263,7 +267,7 @@ void TimecycModifierEditor::DrawInWindow()
     {
         static std::unordered_map<std::string, float> sPrevValues;
     
-        std::string uniqueLabel = std::string(label) + "_" + std::to_string(sSelectedModifierIndex);
+        std::string uniqueLabel = std::string(label) + "_" + std::to_string(msSelectedModifierIndex);
 
         ImGui::DragFloat(uniqueLabel.c_str(), value, speed, min, max);
     
@@ -283,7 +287,7 @@ void TimecycModifierEditor::DrawInWindow()
     {
         static std::unordered_map<std::string, uint8_t> sPrevValues;
         
-        std::string uniqueLabel = std::string(label) + "_" + std::to_string(sSelectedModifierIndex);
+        std::string uniqueLabel = std::string(label) + "_" + std::to_string(msSelectedModifierIndex);
 
         ImGui::DragScalar(uniqueLabel.c_str(), ImGuiDataType_U8, value, speed, &min, &max);
     
@@ -299,7 +303,7 @@ void TimecycModifierEditor::DrawInWindow()
         }
     };
 
-    auto& selectedModifier = TimeCycle::m_aModifiers[sSelectedModifierIndex];
+    auto& selectedModifier = TimeCycle::m_aModifiers[msSelectedModifierIndex];
 
     if(ImGui::CollapsingHeader("Lighting"))
     {
@@ -489,7 +493,7 @@ void __fastcall TimecycModifierEditor::BlendColorSetWithModifierH2(TimeCycle::CC
 
     if(msLockModifier)
     {
-        BlendColorSetWithModifierO(pthis, &TimeCycle::m_aModifiers[sSelectedModifierIndex], 1.0f, true);
+        BlendColorSetWithModifierO(pthis, &TimeCycle::m_aModifiers[msSelectedModifierIndex], 1.0f, true);
         return;
     }
 

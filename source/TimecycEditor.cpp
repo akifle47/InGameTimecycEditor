@@ -23,9 +23,7 @@ static const char* WATER_COLOR_ID             = "##WATER_COLOR";
 
 void TimecycEditor::Initialize()
 {
-    auto pattern = hook::pattern("81 C1 ? ? ? ? 52 51");
-    if(pattern.empty())
-        pattern = hook::pattern{"? 05 ? ? ? ? 89 0D ? ? ? ? 50"};
+    auto pattern = FindPattern({"81 C1 ? ? ? ? 52 51",  "? 05 ? ? ? ? 89 0D ? ? ? ? 50"});
     *(uint32_t*)&TimeCycle::m_ColourSets = *(uint32_t*)pattern.get_first(2);
     
     pattern = hook::pattern("8B 15 ? ? ? ? 3B C8");
@@ -34,9 +32,7 @@ void TimecycEditor::Initialize()
     pattern = hook::pattern("3B 1D ? ? ? ? 7D ? 6A");
     mMinutes = *(int32_t**)pattern.get_first(2);
 
-    pattern = hook::pattern("8B 15 ? ? ? ? 56 8B F1 2B F0");
-    if(pattern.empty())
-        pattern = hook::pattern("8B 3D ? ? ? ? 2B C1 3B C7 7E");
+    pattern = FindPattern({"8B 15 ? ? ? ? 56 8B F1 2B F0",  "8B 3D ? ? ? ? 2B C1 3B C7 7E"});
     mTimerLength = *(uint32_t**)pattern.get_first(2);
 
     pattern = hook::pattern("8B 44 24 ? 39 05 ? ? ? ? 75");
@@ -44,9 +40,7 @@ void TimecycEditor::Initialize()
         pattern = hook::pattern("8B 4C 24 ? 39 0D ? ? ? ? 75");
     ForceWeather = (decltype(ForceWeather))pattern.get_first(0);
 
-    pattern = hook::pattern("E8 ? ? ? ? 8B 44 24 ? 39 05");
-    if(pattern.empty())
-        pattern = hook::pattern("E8 ? ? ? ? 8B 4C 24 ? 8B 74 24 ? 39 0D");
+    pattern = FindPattern({"E8 ? ? ? ? 8B 44 24 ? 39 05",  "E8 ? ? ? ? 8B 4C 24 ? 8B 74 24 ? 39 0D"});
     ReleaseWeather = injector::GetBranchDestination(pattern.get_first(0)).get();
 
     pattern = hook::pattern("68 ? ? ? ? 68 AC 27 CF 79");
