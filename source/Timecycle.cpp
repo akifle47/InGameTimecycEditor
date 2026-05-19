@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <windows.h>
+#include <filesystem>
 #include <assert.h>
 
 struct SerializationContext
@@ -124,13 +126,20 @@ bool TimeCycle::Save(const char *fileName, char *errMessage, uint32_t errMessage
 
     if(!file.good())
     {
-        if(errMessageSize > 0)
-        {
-            memset(errMessage, 0, errMessageSize);
-            strerror_s(errMessage, errMessageSize, errno);
-        }
+        char gameRootDir[MAX_PATH];
+        GetModuleFileNameA(NULL, gameRootDir, MAX_PATH);
+        file = std::ofstream(std::filesystem::path(gameRootDir).parent_path() / fileName);
 
-        return false;
+        if(!file.good())
+        {
+            if(errMessageSize > 0)
+            {
+                memset(errMessage, 0, errMessageSize);
+                strerror_s(errMessage, errMessageSize, errno);
+            }
+
+            return false;
+        }
     }
 
     const char *timeOfDayNames[NUM_HOURS] = {"Midnight", "5AM", "6AM", "7AM", "9AM", "Midday", "6PM", "7PM", "8PM", "9PM", "10PM"};
@@ -305,13 +314,20 @@ bool TimeCycle::Load(const char *fileName, char *errMessage, uint32_t errMessage
 
     if(!file.good())
     {
-        if(errMessageSize > 0)
-        {
-            memset(errMessage, 0, errMessageSize);
-            strerror_s(errMessage, errMessageSize, errno);
-        }
+        char gameRootDir[MAX_PATH];
+        GetModuleFileNameA(NULL, gameRootDir, MAX_PATH);
+        file = std::ifstream(std::filesystem::path(gameRootDir).parent_path() / fileName);
 
-        return false;
+        if(!file.good())
+        {
+            if(errMessageSize > 0)
+            {
+                memset(errMessage, 0, errMessageSize);
+                strerror_s(errMessage, errMessageSize, errno);
+            }
+
+            return false;
+        }
     }
 
     float tempUnusedParam = 0.0f;
@@ -491,13 +507,20 @@ bool TimeCycle::SerializeModifier(const char* fileName, char* errMessage, uint32
 
     if(!gSerializationContext.File.good())
     {
-        if(errMessageSize > 0)
-        {
-            memset(errMessage, 0, errMessageSize);
-            strerror_s(errMessage, errMessageSize, errno);
-        }
+        char gameRootDir[MAX_PATH];
+        GetModuleFileNameA(NULL, gameRootDir, MAX_PATH);
+        gSerializationContext.File = std::fstream(std::filesystem::path(gameRootDir).parent_path() / fileName, writing ? std::ios::out : std::ios::in);
 
-        return false;
+        if(!gSerializationContext.File.good())
+        {
+            if(errMessageSize > 0)
+            {
+                memset(errMessage, 0, errMessageSize);
+                strerror_s(errMessage, errMessageSize, errno);
+            }
+
+            return false;
+        }
     }
 
     std::string currLine;
