@@ -43,10 +43,57 @@ void TimecycEditor::Initialize()
     pattern = FindPattern({"E8 ? ? ? ? 8B 44 24 ? 39 05",  "E8 ? ? ? ? 8B 4C 24 ? 8B 74 24 ? 39 0D"});
     ReleaseWeather = injector::GetBranchDestination(pattern.get_first(0)).get();
 
+    auto searchStringPattern = [](const char* str)
+    {
+        char patternStr[512]{};
+        for(size_t i = 0; i < strlen(str); i++)
+        {
+            char hex[3]{};
+            sprintf(hex, "%X", str[i]);
+            strcat(patternStr, hex);
+            if(i != sizeof(str) - 1)
+                strcat(patternStr, " ");
+        }
+
+        hook::pattern dataPattern{};
+        HMODULE base = GetModuleHandle(NULL);
+        IMAGE_DOS_HEADER* dos = (IMAGE_DOS_HEADER*)base;
+        IMAGE_NT_HEADERS* nt = (IMAGE_NT_HEADERS*)((uint8_t*)(base)+dos->e_lfanew);
+        IMAGE_SECTION_HEADER* section = IMAGE_FIRST_SECTION(nt);
+        for(WORD i = 0; i < nt->FileHeader.NumberOfSections; i++, section++)
+        {
+            if(strncmp((char*)section->Name, ".rdata", 8) == 0)
+            {
+                uintptr_t rDataBase = (uintptr_t)base + section->VirtualAddress;
+                uintptr_t rDataEnd = rDataBase + section->Misc.VirtualSize;
+                dataPattern = hook::make_range_pattern(rDataBase, rDataEnd, patternStr);
+                Sleep(300);
+                dataPattern.get(0);
+                break;
+            }
+        }
+
+        return dataPattern;
+    };
+
     pattern = hook::pattern("68 ? ? ? ? 68 AC 27 CF 79");
+    if(pattern.empty())
+    {
+        uintptr_t strAddr = (uintptr_t)searchStringPattern("SET_TIME_ONE_DAY_FORWARD").get_first(0);
+        char patternStr[32]{};
+        sprintf(patternStr, "68 ? ? ? ? 68 %02X %02X %02X %02X", uint8_t(strAddr), uint8_t(strAddr >> 8), uint8_t(strAddr >> 16), uint8_t(strAddr >> 24));
+        pattern = hook::pattern(patternStr);
+    }
     SetTimeOneDayForward = *(decltype(SetTimeOneDayForward)*)pattern.get_first(1);
 
     pattern = hook::pattern("68 ? ? ? ? 68 17 62 13 18");
+    if(pattern.empty())
+    {
+        uintptr_t strAddr = (uintptr_t)searchStringPattern("SET_TIME_ONE_DAY_BACK").get_first(0);
+        char patternStr[32]{};
+        sprintf(patternStr, "68 ? ? ? ? 68 %02X %02X %02X %02X", uint8_t(strAddr), uint8_t(strAddr >> 8), uint8_t(strAddr >> 16), uint8_t(strAddr >> 24));
+        pattern = hook::pattern(patternStr);
+    }
     SetTimeOneDayBack = *(decltype(SetTimeOneDayBack)*)pattern.get_first(1);
 
     TimecycModifierEditor::Init();
