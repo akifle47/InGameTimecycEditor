@@ -67,7 +67,6 @@ void TimecycEditor::Initialize()
                 uintptr_t rDataBase = (uintptr_t)base + section->VirtualAddress;
                 uintptr_t rDataEnd = rDataBase + section->Misc.VirtualSize;
                 dataPattern = hook::make_range_pattern(rDataBase, rDataEnd, patternStr);
-                Sleep(300);
                 dataPattern.get(0);
                 break;
             }
