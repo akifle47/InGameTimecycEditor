@@ -27,7 +27,7 @@ void TimecycEditor::Initialize()
     *(uint32_t*)&TimeCycle::m_ColourSets = *(uint32_t*)pattern.get_first(2);
     
     pattern = hook::pattern("8B 15 ? ? ? ? 3B C8");
-    mHour = *(int32_t**)pattern.get_first(2);
+    mHours = *(int32_t**)pattern.get_first(2);
 
     pattern = hook::pattern("3B 1D ? ? ? ? 7D ? 6A");
     mMinutes = *(int32_t**)pattern.get_first(2);
@@ -346,6 +346,7 @@ void TimecycEditor::SaveSettings()
     file.write((char*)&mOpenWindowKey, sizeof(ImGuiKey));
     file.write((char*)&mToggleCameraControlKey, sizeof(ImGuiKey));
     //file.write((char*)&mItemInnerSpacing, sizeof(float));
+    file.write((char*)&mLockTimeAndWeatherIfClosed, sizeof(bool));
 }
 
 void TimecycEditor::LoadSettings()
@@ -357,7 +358,8 @@ void TimecycEditor::LoadSettings()
         return;
     }
     
-    file.seekg(2);
+    file.read((char*)&mSettingsFileMajorVersion, sizeof(char));
+    file.read((char*)&mSettingsFileMinorVersion, sizeof(char));
     file.read((char*)&mWindowPos.x, sizeof(float));
     file.read((char*)&mWindowPos.y, sizeof(float));
     file.read((char*)&mWindowSize.x, sizeof(float));
@@ -366,6 +368,11 @@ void TimecycEditor::LoadSettings()
     file.read((char*)&mOpenWindowKey, sizeof(ImGuiKey));
     file.read((char*)&mToggleCameraControlKey, sizeof(ImGuiKey));
     //file.read((char*)&mItemInnerSpacing, sizeof(float));
+
+    if(mSettingsFileMajorVersion == 1 && mSettingsFileMinorVersion == 3)
+    {
+        file.read((char*)&mLockTimeAndWeatherIfClosed, sizeof(bool));
+    }
 
     if(mIsImGuiInitialized)
     {
@@ -458,14 +465,6 @@ void TimecycEditor::Update()
             sUndoStack.push(action);
         }
 
-        if(mLockTimeAndWeather)
-        {
-            *mHour = mSelectedHour;
-            *mMinutes = mSelectedMinutes;
-
-            ForceWeather(mSelectedWeather);
-        }
-
         static float prevFontScale = mFontScale;
         if(mFontScale != prevFontScale)
         {
@@ -474,17 +473,25 @@ void TimecycEditor::Update()
         }
     }
     
+    if((mLockTimeAndWeather && mShowWindow) || (mLockTimeAndWeather && mLockTimeAndWeatherIfClosed))
+    {
+        *mHours = mSelectedHour;
+        *mMinutes = mSelectedMinutes;
+
+        ForceWeather(mSelectedWeather);
+    }
+
     bool windowWasJustClosed = prevShowWindow && !mShowWindow;
-    if(windowWasJustClosed)
+    if(windowWasJustClosed && !mLockTimeAndWeatherIfClosed)
     {
         ReleaseWeather();
-        *mTimerLength = 2000;
+        *mTimerLength = DEFAULT_MILLISECONDS_PER_GAME_MINUTE;
     }
 
     bool windowWasJustOpened = !prevShowWindow && mShowWindow;
-    if(windowWasJustOpened && mLockTimeAndWeather)
+    if(windowWasJustOpened && (mLockTimeAndWeather || (mLockTimeAndWeather && mLockTimeAndWeatherIfClosed)))
     {
-        *mTimerLength = 30000;
+        *mTimerLength = LOCKED_MILLISECONDS_PER_GAME_MINUTE;
     }
 }
 
@@ -611,17 +618,17 @@ void TimecycEditor::DrawMainWindow()
         {
             ImGui::PopStyleVar();
 
-            ImGui::Checkbox("Lock to Selected Time, Weather and Day", &mLockTimeAndWeather);
+            ImGui::Checkbox("Lock to Selected Time and Weather", &mLockTimeAndWeather);
             if(ImGui::IsItemEdited())
             {
                 if(mLockTimeAndWeather)
                 {
-                    *mTimerLength = 30000;
+                    *mTimerLength = LOCKED_MILLISECONDS_PER_GAME_MINUTE;
                 }
                 else
                 {
                     ReleaseWeather();
-                    *mTimerLength = 2000;
+                    *mTimerLength = DEFAULT_MILLISECONDS_PER_GAME_MINUTE;
                 }
             }
 
@@ -1316,6 +1323,13 @@ void TimecycEditor::DrawSettingsWindow()
                     }
                 }
             }
+
+
+            ImGui::NewLine();
+
+            // lock time and weather if editor window is closed
+
+            ImGui::Checkbox("Keep Time and Weather Locked If The Editor Window Is Closed.", &mLockTimeAndWeatherIfClosed);
 
             // saving and loading
 

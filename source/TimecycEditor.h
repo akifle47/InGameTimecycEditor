@@ -53,7 +53,7 @@ private:
 
     bool mDisableMouseControl = false;
 
-    int32_t *mHour = nullptr;
+    int32_t *mHours = nullptr;
     int32_t *mMinutes = nullptr;
     uint32_t *mTimerLength = nullptr;
 
@@ -68,7 +68,7 @@ private:
     bool mOnlyTimecycTimes = true;
 
     const uint8_t mSettingsFileMajorVersion = 1;
-    const uint8_t mSettingsFileMinorVersion = 2;
+    const uint8_t mSettingsFileMinorVersion = 3;
 
     bool mShowWindow = false;
     bool mShowSaveWindow = false;
@@ -82,7 +82,8 @@ private:
     ImVec2 mWindowSize = ImVec2(440.0f, 650.0f);
     float mFontScale = 1.0f;
     ImGuiKey mToggleCameraControlKey = ImGuiKey_None;
-    
+    bool mLockTimeAndWeatherIfClosed = false;
+
     enum TIMECYC_PARAM_TYPE
     {
         TIMECYCPARAMTYPE_COLOR_U32 = 1,
@@ -92,4 +93,7 @@ private:
     };
 
     std::array<std::tuple<std::string, uint32_t, TIMECYC_PARAM_TYPE>, 80> mTimecycParamNameOffsetAndType;
+
+    static constexpr uint32_t DEFAULT_MILLISECONDS_PER_GAME_MINUTE = 2000;
+    static constexpr uint32_t LOCKED_MILLISECONDS_PER_GAME_MINUTE  = 30000;
 };
