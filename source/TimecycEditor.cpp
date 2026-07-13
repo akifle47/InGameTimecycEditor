@@ -493,25 +493,6 @@ void TimecycEditor::Update()
     {
         *mTimerLength = LOCKED_MILLISECONDS_PER_GAME_MINUTE;
     }
-}
-
-void TimecycEditor::OnBeforeD3D9DeviceReset(IDirect3DDevice9 *d3d9Device)
-{
-    InitializeImGui(d3d9Device);
-
-    ImGui_ImplDX9_InvalidateDeviceObjects();
-}
-
-void TimecycEditor::OnAfterD3D9DeviceReset()
-{
-    ImGui_ImplDX9_CreateDeviceObjects();
-}
-
-void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
-{
-    InitializeImGui(d3d9Device);
-
-    Update();
 
     ImGui_ImplDX9_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -530,6 +511,27 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
 
     ImGui::EndFrame();
     ImGui::Render();
+}
+
+void TimecycEditor::OnBeforeD3D9DeviceReset(IDirect3DDevice9 *d3d9Device)
+{
+    InitializeImGui(d3d9Device);
+
+    ImGui_ImplDX9_InvalidateDeviceObjects();
+}
+
+void TimecycEditor::OnAfterD3D9DeviceReset()
+{
+    ImGui_ImplDX9_CreateDeviceObjects();
+}
+
+void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
+{
+    if(!ImGui::GetDrawData())
+        return;
+
+    InitializeImGui(d3d9Device);
+
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 }
 
