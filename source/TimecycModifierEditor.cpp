@@ -506,7 +506,7 @@ void __fastcall TimecycModifierEditor::BlendTimeCycleModifiersH1(TimeCycle::CTim
     pthis->m_Hash = that->m_Hash;
 
     if(msLockModifier)
-        return;
+        weight = 0.0f;
 
     BlendTimeCycleModifiersO(pthis, that, weight);
 }
@@ -517,7 +517,7 @@ void __fastcall TimecycModifierEditor::BlendTimeCycleModifiersH2(TimeCycle::CTim
     msActiveInteriorModifiers[that->m_Hash].second = std::max(currWeightMul, weight);
 
     if(msLockModifier)
-        return;
+        weight = 0.0f;
 
     BlendTimeCycleModifiersO(pthis, that, weight);
 }

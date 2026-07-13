@@ -89,6 +89,13 @@ HWND grcDevice__CreateDeviceWindowH()
     return hwnd;
 }
 
+// We need to update the timecyc editor here instead of "D3D9DeviceEndSceneH" because EndScene is called from the render thread, and the timecyc editor needs to be updated from the main thread.
+void(__cdecl* CSystem__AddDrawList_EndRenderO)() = nullptr;
+void CSystem__AddDrawList_EndRenderH()
+{
+    gTimecycEditor.Update();
+    CSystem__AddDrawList_EndRenderO();
+}
 
 void CatastrophicError(const wchar_t* msg)
 {
@@ -136,6 +143,11 @@ bool Initialize()
 
     auto pattern = FindPattern({"E8 ? ? ? ? A3 ? ? ? ? A1 ? ? ? ? C6 05",  "E8 ? ? ? ? A3 ? ? ? ? C6 05 ? ? ? ? ? A1",  "E8 ? ? ? ? 8B 0D ? ? ? ? A3 ? ? ? ? C6 05"});
     grcDevice__CreateDeviceWindowO = injector::MakeCALL(pattern.get_first(0), grcDevice__CreateDeviceWindowH).get();
+
+    // other
+
+    pattern = FindPattern({"E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? ? ? ? 76 ? FF 15", "E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? ? ? ? 76"});
+    CSystem__AddDrawList_EndRenderO = injector::MakeCALL(pattern.get_first(0), CSystem__AddDrawList_EndRenderH).get();
 
     return true;
 }
