@@ -121,7 +121,6 @@ void TimecycEditor::Initialize()
     mTimecycParamNameOffsetAndType[17] = {"DOF Start", 0x4C, TIMECYCPARAMTYPE_FLOAT};
     mTimecycParamNameOffsetAndType[18] = {"Near DOF Blur", 0x50, TIMECYCPARAMTYPE_FLOAT};
     mTimecycParamNameOffsetAndType[19] = {"Far DOF Blur", 0x54, TIMECYCPARAMTYPE_FLOAT};
-    mTimecycParamNameOffsetAndType[20] = {"Far DOF Blur", 0x54, TIMECYCPARAMTYPE_FLOAT};
     mTimecycParamNameOffsetAndType[21] = {"Low Clouds Color", 0x58, TIMECYCPARAMTYPE_COLOR_U32};
     mTimecycParamNameOffsetAndType[22] = {"Bottom Clouds Color", 0x5C, TIMECYCPARAMTYPE_COLOR_U32};
     mTimecycParamNameOffsetAndType[23] = {"Water", 0x60, TIMECYCPARAMTYPE_COLOR_U32};
