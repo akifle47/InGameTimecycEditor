@@ -131,10 +131,10 @@ bool Initialize()
     uint32_t* dinput8Device_vft = *(uint32_t**)dinput8Device;
 
     DInput8DeviceGetDeviceStateO = (decltype(DInput8DeviceGetDeviceStateO))dinput8Device_vft[9];
-    dinput8Device_vft[9] = (uint32_t)DInput8DeviceGetDeviceStateH;
+    injector::WriteMemory(&dinput8Device_vft[9], (uint32_t)DInput8DeviceGetDeviceStateH, true);
 
     DInput8DeviceAcquireO = (decltype(DInput8DeviceAcquireO))dinput8Device_vft[7];
-    dinput8Device_vft[7] = (uint32_t)DInput8DeviceAcquireH;
+    injector::WriteMemory(&dinput8Device_vft[7], (uint32_t)DInput8DeviceAcquireH, true);
 
     dinput8->Release();
     dinput8Device->Release();
