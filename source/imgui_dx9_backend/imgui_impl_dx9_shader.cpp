@@ -102,7 +102,7 @@ static void ImGui_ImplDX9_SetupRenderState(ImDrawData *draw_data)
     bd->pd3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
     bd->pd3dDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_ONE);
     bd->pd3dDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
-    bd->pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+    bd->pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
     bd->pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
     bd->pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
@@ -129,11 +129,22 @@ static void ImGui_ImplDX9_SetupRenderState(ImDrawData *draw_data)
 // Render function.
 void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
 {
-    // A renderer should not trust this pointer.
+    // Avoid rendering when minimized
     if (!draw_data)
         return;
 
-    // Avoid rendering when minimized
+    // A null shader draws nothing, silently. Retry here rather than in
+    // NewFrame: this is the thread that owns the device.
+    {
+        ImGui_ImplDX9_Data* bd0 = ImGui_ImplDX9_GetBackendData();
+        if (bd0 && (!bd0->pvertexShader || !bd0->ppixelShader || !bd0->FontTexture || !bd0->pvertexDeclaration))
+        {
+            ImGui_ImplDX9_CreateDeviceObjects();
+            if (!bd0->pvertexShader || !bd0->ppixelShader || !bd0->FontTexture || !bd0->pvertexDeclaration)
+                return;
+        }
+    }
+
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
         return;
 
@@ -255,6 +266,162 @@ void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
     d3d9_state_block->Release();
 }
 
+// Fixed-function, pre-transformed render path.
+//
+// Some setups hook a COM-compatible wrapper device that returns S_OK from
+// SetVertexShaderConstantF without applying it, so the shader path transforms
+// by identity and every triangle lands off-screen. XYZRHW needs no vertex
+// shader and no constants.
+struct ImGui_ImplDX9_FFVert
+{
+    float x, y, z, rhw;
+    D3DCOLOR col;
+    float u, v;
+};
+#define IMGUI_FF_FVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+
+static void ImGui_ImplDX9_SetupRenderStateFF(ImDrawData* draw_data)
+{
+    ImGui_ImplDX9_Data* bd = ImGui_ImplDX9_GetBackendData();
+    IDirect3DDevice9* dev = bd->pd3dDevice;
+
+    D3DVIEWPORT9 vp;
+    vp.X = vp.Y = 0;
+    vp.Width = (DWORD)draw_data->DisplaySize.x;
+    vp.Height = (DWORD)draw_data->DisplaySize.y;
+    vp.MinZ = 0.0f;
+    vp.MaxZ = 1.0f;
+    dev->SetViewport(&vp);
+
+    dev->SetVertexShader(nullptr);
+    dev->SetPixelShader(nullptr);
+    dev->SetFVF(IMGUI_FF_FVF);
+
+    dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    dev->SetRenderState(D3DRS_LIGHTING, FALSE);
+    dev->SetRenderState(D3DRS_ZENABLE, FALSE);
+    dev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+    dev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    dev->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+    dev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    dev->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+    dev->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_ONE);
+    dev->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+    dev->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+    dev->SetRenderState(D3DRS_FOGENABLE, FALSE);
+    dev->SetRenderState(D3DRS_RANGEFOGENABLE, FALSE);
+    dev->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
+    dev->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+    dev->SetRenderState(D3DRS_CLIPPING, TRUE);
+    dev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+    dev->SetRenderState(D3DRS_WRAP0, 0);
+    dev->SetRenderState(D3DRS_COLORWRITEENABLE, 0xF);
+
+    dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    dev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    dev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    dev->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
+    dev->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+    dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    dev->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+    dev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+    dev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+    dev->SetSamplerState(0, D3DSAMP_SRGBTEXTURE, 0);
+}
+
+void ImGui_ImplDX9_RenderDrawDataFF(ImDrawData* draw_data)
+{
+    // A renderer should not trust this pointer.
+    if (!draw_data)
+        return;
+
+    if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
+        return;
+
+    ImGui_ImplDX9_Data* bd = ImGui_ImplDX9_GetBackendData();
+    if (!bd || !bd->pd3dDevice || !bd->FontTexture)
+        return;
+    IDirect3DDevice9* dev = bd->pd3dDevice;
+
+    IDirect3DStateBlock9* sb = nullptr;
+    if (dev->CreateStateBlock(D3DSBT_ALL, &sb) < 0)
+        return;
+    if (sb->Capture() < 0)
+    {
+        sb->Release();
+        return;
+    }
+
+    ImGui_ImplDX9_SetupRenderStateFF(draw_data);
+
+    // Vertices are already in pixel space, which XYZRHW consumes directly.
+    // The -0.5 aligns pixel centres with texel centres.
+    static ImVector<ImGui_ImplDX9_FFVert> verts;
+    ImVec2 off = draw_data->DisplayPos;
+    for (int n = 0; n < draw_data->CmdListsCount; n++)
+    {
+        const ImDrawList* cl = draw_data->CmdLists[n];
+        verts.resize(cl->VtxBuffer.Size);
+        const ImDrawVert* src = cl->VtxBuffer.Data;
+        ImGui_ImplDX9_FFVert* dst = verts.Data;
+        for (int i = 0; i < cl->VtxBuffer.Size; i++, src++, dst++)
+        {
+            dst->x = src->pos.x - off.x - 0.5f;
+            dst->y = src->pos.y - off.y - 0.5f;
+            dst->z = 0.0f;
+            dst->rhw = 1.0f;
+            dst->col = IMGUI_COL_TO_DX9_ARGB(src->col);
+            dst->u = src->uv.x;
+            dst->v = src->uv.y;
+        }
+
+        for (int cmd_i = 0; cmd_i < cl->CmdBuffer.Size; cmd_i++)
+        {
+            const ImDrawCmd* pcmd = &cl->CmdBuffer[cmd_i];
+            if (pcmd->UserCallback != nullptr)
+            {
+                if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
+                    ImGui_ImplDX9_SetupRenderStateFF(draw_data);
+                else
+                    pcmd->UserCallback(cl, pcmd);
+                continue;
+            }
+            if (pcmd->ElemCount == 0)
+                continue;
+
+            ImVec2 clip_min(pcmd->ClipRect.x - off.x, pcmd->ClipRect.y - off.y);
+            ImVec2 clip_max(pcmd->ClipRect.z - off.x, pcmd->ClipRect.w - off.y);
+            if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+                continue;
+            RECT sr = { (LONG)clip_min.x, (LONG)clip_min.y,
+                        (LONG)clip_max.x, (LONG)clip_max.y };
+            dev->SetScissorRect(&sr);
+
+            dev->SetTexture(0, (LPDIRECT3DTEXTURE9)pcmd->GetTexID());
+            dev->DrawIndexedPrimitiveUP(
+                D3DPT_TRIANGLELIST,
+                0,
+                (UINT)(cl->VtxBuffer.Size - pcmd->VtxOffset),
+                pcmd->ElemCount / 3,
+                cl->IdxBuffer.Data + pcmd->IdxOffset,
+                sizeof(ImDrawIdx) == 2 ? D3DFMT_INDEX16 : D3DFMT_INDEX32,
+                verts.Data + pcmd->VtxOffset,
+                sizeof(ImGui_ImplDX9_FFVert));
+        }
+    }
+
+    sb->Apply();
+    sb->Release();
+}
+
 bool ImGui_ImplDX9_Init(IDirect3DDevice9* device)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -307,11 +474,17 @@ static bool ImGui_ImplDX9_CreateFontsTexture()
 
     // Upload texture to graphics system
     bd->FontTexture = nullptr;
-    if (bd->pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &bd->FontTexture, nullptr) < 0)
+    HRESULT texHr = bd->pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &bd->FontTexture, nullptr);
+    if (texHr < 0)
+    {
         return false;
+    }
     D3DLOCKED_RECT tex_locked_rect;
-    if (bd->FontTexture->LockRect(0, &tex_locked_rect, nullptr, 0) != D3D_OK)
+    HRESULT lockHr = bd->FontTexture->LockRect(0, &tex_locked_rect, nullptr, 0);
+    if (lockHr != D3D_OK)
+    {
         return false;
+    }
     for (int y = 0; y < height; y++)
         memcpy((unsigned char*)tex_locked_rect.pBits + (size_t)tex_locked_rect.Pitch * y, pixels + (size_t)width * bytes_per_pixel * y, (size_t)width * bytes_per_pixel);
     bd->FontTexture->UnlockRect(0);
@@ -366,10 +539,14 @@ bool ImGui_ImplDX9_CreateDeviceObjects()
 
     hr = D3DXCompileShader(vertex_shader_source, strlen(vertex_shader_source), NULL, NULL, "main", "vs_3_0", NULL, &vertex_shader_buffer, NULL, NULL);
     if(hr != D3D_OK)
+    {
         return false;
+    }
     hr = bd->pd3dDevice->CreateVertexShader((DWORD*)vertex_shader_buffer->GetBufferPointer(), &bd->pvertexShader);
     if(hr != D3D_OK)
+    {
         return false;
+    }
 
     vertex_shader_buffer->Release();
 
@@ -393,10 +570,14 @@ bool ImGui_ImplDX9_CreateDeviceObjects()
 
     hr = D3DXCompileShader(pixel_shader_source, strlen(pixel_shader_source), NULL, NULL, "main", "ps_3_0", NULL, &pixel_shader_buffer, NULL, NULL);
     if(hr != D3D_OK)
+    {
         return false;
+    }
     hr = bd->pd3dDevice->CreatePixelShader((DWORD*)pixel_shader_buffer->GetBufferPointer(), &bd->ppixelShader);
     if(hr != D3D_OK)
+    {
         return false;
+    }
 
     pixel_shader_buffer->Release();
 
@@ -408,7 +589,11 @@ bool ImGui_ImplDX9_CreateDeviceObjects()
         D3DDECL_END()
     };
     
-    bd->pd3dDevice->CreateVertexDeclaration(vertexDeclElements, &bd->pvertexDeclaration);
+    HRESULT declHr = bd->pd3dDevice->CreateVertexDeclaration(vertexDeclElements, &bd->pvertexDeclaration);
+    if(declHr != D3D_OK)
+    {
+        return false;
+    }
 
     return true;
 }
