@@ -129,6 +129,10 @@ static void ImGui_ImplDX9_SetupRenderState(ImDrawData *draw_data)
 // Render function.
 void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
 {
+    // A renderer should not trust this pointer.
+    if (!draw_data)
+        return;
+
     // Avoid rendering when minimized
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
         return;

@@ -24,6 +24,7 @@ static const char* WATER_COLOR_ID             = "##WATER_COLOR";
 void TimecycEditor::Initialize()
 {
     auto pattern = FindPattern({"81 C1 ? ? ? ? 52 51",  "? 05 ? ? ? ? 89 0D ? ? ? ? 50"});
+    if(pattern.empty()) { gEditorDead = true; return; }
     *(uint32_t*)&TimeCycle::m_ColourSets = *(uint32_t*)pattern.get_first(2);
     
     pattern = hook::pattern("8B 15 ? ? ? ? 3B C8");
@@ -96,6 +97,7 @@ void TimecycEditor::Initialize()
     SetTimeOneDayBack = *(decltype(SetTimeOneDayBack)*)pattern.get_first(1);
 
     TimecycModifierEditor::Init();
+    if(gEditorDead) return;
 
     LoadSettings();
     TimeCycle::Load("pc/data/timecyc.dat", nullptr, 0);
