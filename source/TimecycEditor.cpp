@@ -534,7 +534,7 @@ void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
 
     InitializeImGui(d3d9Device);
 
-    ImGui_ImplDX9_RenderDrawData(drawData);
+    ImGui_ImplDX9_RenderDrawDataFF(drawData);
 }
 
 void TimecycEditor::DrawMainWindow()
