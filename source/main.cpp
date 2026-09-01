@@ -73,17 +73,37 @@ HRESULT __stdcall DInput8DeviceAcquireH(IDirectInputDevice8 *This)
 HWND(__cdecl* grcDevice__CreateDeviceWindowO)() = nullptr;
 HWND grcDevice__CreateDeviceWindowH()
 {
-    // D3D9 hooks
+    HWND hwnd = grcDevice__CreateDeviceWindowO();
+
     auto pattern = FindPattern({"C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? 8B 0D ? ? ? ? 8B 51",  "C7 05 ? ? ? ? ? ? ? ? E8 ? ? ? ? A1 ? ? ? ? 68 ? ? ? ? ? ? 6A"});
-    uint32_t* d3d9_vft = **(uint32_t***)pattern.get_first(6);
+    if(pattern.empty())
+    {
+        return hwnd;
+    }
+
+    uint32_t** ppvft = *(uint32_t***)pattern.get_first(6);
+    if(!IsReadable(ppvft, 4) || !IsReadable(*ppvft, 43 * 4))
+    {
+        return hwnd;
+    }
+
+    uint32_t* d3d9_vft = *ppvft;
+
+    // This can run twice. A second install would read our own hook back out
+    // as the original and make it call itself.
+    static uint32_t* installedOn = nullptr;
+    if(installedOn)
+    {
+        return hwnd;
+    }
+    installedOn = d3d9_vft;
 
     D3D9DeviceEndSceneO = (decltype(D3D9DeviceEndSceneO))d3d9_vft[42];
-    injector::WriteMemory(&d3d9_vft[42], (uint32_t)D3D9DeviceEndSceneH, true);
+    PatchDword(&d3d9_vft[42], (uint32_t)D3D9DeviceEndSceneH);
 
     D3D9DeviceResetO = (decltype(D3D9DeviceResetO))d3d9_vft[16];
-    injector::WriteMemory(&d3d9_vft[16], (uint32_t)D3D9DeviceResetH, true);
+    PatchDword(&d3d9_vft[16], (uint32_t)D3D9DeviceResetH);
 
-    HWND hwnd = grcDevice__CreateDeviceWindowO();
     WndProcO = (WNDPROC)SetWindowLongPtr(hwnd, GWL_WNDPROC, (LONG_PTR)WndProcH);
 
     return hwnd;
@@ -93,7 +113,8 @@ HWND grcDevice__CreateDeviceWindowH()
 void(__cdecl* CSystem__AddDrawList_EndRenderO)() = nullptr;
 void CSystem__AddDrawList_EndRenderH()
 {
-    gTimecycEditor.Update();
+    if(!gEditorDead)
+        gTimecycEditor.Update();
     CSystem__AddDrawList_EndRenderO();
 }
 
@@ -104,13 +125,15 @@ void CatastrophicError(const wchar_t* msg)
     #ifdef _DEBUG
         __debugbreak();
     #endif // DEBUG
-
-    std::abort();
 }
 
-bool Initialize()
+static bool InitBody()
 {
     gTimecycEditor.Initialize();
+    if(gEditorDead)
+    {
+        return false;
+    }
 
     // DirectInput hooks
 
@@ -130,11 +153,12 @@ bool Initialize()
 
     uint32_t* dinput8Device_vft = *(uint32_t**)dinput8Device;
 
+    // Recorded so a failed init can restore them.
     DInput8DeviceGetDeviceStateO = (decltype(DInput8DeviceGetDeviceStateO))dinput8Device_vft[9];
-    injector::WriteMemory(&dinput8Device_vft[9], (uint32_t)DInput8DeviceGetDeviceStateH, true);
+    PatchDword(&dinput8Device_vft[9], (uint32_t)DInput8DeviceGetDeviceStateH);
 
     DInput8DeviceAcquireO = (decltype(DInput8DeviceAcquireO))dinput8Device_vft[7];
-    injector::WriteMemory(&dinput8Device_vft[7], (uint32_t)DInput8DeviceAcquireH, true);
+    PatchDword(&dinput8Device_vft[7], (uint32_t)DInput8DeviceAcquireH);
 
     dinput8->Release();
     dinput8Device->Release();
@@ -142,13 +166,43 @@ bool Initialize()
     // wom
 
     auto pattern = FindPattern({"E8 ? ? ? ? A3 ? ? ? ? A1 ? ? ? ? C6 05",  "E8 ? ? ? ? A3 ? ? ? ? C6 05 ? ? ? ? ? A1",  "E8 ? ? ? ? 8B 0D ? ? ? ? A3 ? ? ? ? C6 05"});
-    grcDevice__CreateDeviceWindowO = injector::MakeCALL(pattern.get_first(0), grcDevice__CreateDeviceWindowH).get();
+    if(pattern.empty()) return false;
+    grcDevice__CreateDeviceWindowO = (decltype(grcDevice__CreateDeviceWindowO))PatchCall(pattern.get_first(0), grcDevice__CreateDeviceWindowH);
 
     // other
 
     pattern = FindPattern({"E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? ? ? ? 76 ? FF 15", "E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? ? ? ? 76"});
-    CSystem__AddDrawList_EndRenderO = injector::MakeCALL(pattern.get_first(0), CSystem__AddDrawList_EndRenderH).get();
+    if(pattern.empty()) return false;
+    CSystem__AddDrawList_EndRenderO = (decltype(CSystem__AddDrawList_EndRenderO))PatchCall(pattern.get_first(0), CSystem__AddDrawList_EndRenderH);
 
+    return true;
+}
+
+static DWORD InitCrashFilter(EXCEPTION_POINTERS*)
+{
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+bool Initialize()
+{
+    // Whatever happens here the game survives: an exception is caught rather
+    // than escaping into the loader, every patch is rolled back, and the
+    // module stays resident but inert.
+    bool ok = false;
+    __try
+    {
+        ok = InitBody();
+    }
+    __except(InitCrashFilter(GetExceptionInformation()))
+    {
+        ok = false;
+    }
+
+    if(!ok)
+    {
+        gEditorDead = true;
+        RollbackAllPatches();
+    }
     return true;
 }
 

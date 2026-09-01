@@ -17,18 +17,23 @@ static const char* COLOR_ADD_ID               = "##MOD_COLOR_ADD";
 void TimecycModifierEditor::Init()
 {
     auto pattern = FindPattern({"E8 ? ? ? ? 0F 57 C9 81 C6",  "E8 ? ? ? ? 8B 44 24 ? 0F 57 C9"});
-    BlendColorSetWithModifierO = injector::MakeCALL(pattern.get_first(0), BlendColorSetWithModifierH1).get();
+    if(pattern.empty()) { gEditorDead = true; return; }
+    BlendColorSetWithModifierO = (decltype(BlendColorSetWithModifierO))PatchCall(pattern.get_first(0), BlendColorSetWithModifierH1);
 
     pattern = FindPattern({"E8 ? ? ? ? F3 0F 10 44 24 ? F3 0F 59 44 24 ? F3 0F 10 0D",  "E8 ? ? ? ? F3 0F 10 15 ? ? ? ? F3 0F 2A 83",  "E8 ? ? ? ? 66 0F 6E 97"});
-    injector::MakeCALL(pattern.get_first(0), BlendColorSetWithModifierH2);
+    if(pattern.empty()) { gEditorDead = true; return; }
+    PatchCall(pattern.get_first(0), BlendColorSetWithModifierH2);
 
     pattern = FindPattern({"E8 ? ? ? ? F3 0F 10 84 B4 ? ? ? ? 51",  "E8 ? ? ? ? ? ? ? ? 51 8B D1"});
-    BlendTimeCycleModifiersO = injector::MakeCALL(pattern.get_first(0), BlendTimeCycleModifiersH1).get();
+    if(pattern.empty()) { gEditorDead = true; return; }
+    BlendTimeCycleModifiersO = (decltype(BlendTimeCycleModifiersO))PatchCall(pattern.get_first(0), BlendTimeCycleModifiersH1);
 
     pattern = FindPattern({"E8 ? ? ? ? 0F 57 C0 0F 2F 86 ? ? ? ? 72",  "E8 ? ? ? ? 8B 4C 24 ? 8B 54 24 ? 0F 57 C0"});
-    injector::MakeCALL(pattern.get_first(0), BlendTimeCycleModifiersH2);
+    if(pattern.empty()) { gEditorDead = true; return; }
+    PatchCall(pattern.get_first(0), BlendTimeCycleModifiersH2);
 
     pattern = FindPattern({"89 86 ? ? ? ? 33 C9 8A AC 24",  "89 86 ? ? ? ? F3 0F 11 86 ? ? ? ? 0F B6 8C 24"});
+    if(pattern.empty()) { gEditorDead = true; return; }
     TimeCycle::m_aModifiers = *(decltype(TimeCycle::m_aModifiers)*)pattern.get_first(2);
 
     Load();
@@ -473,8 +478,17 @@ void TimecycModifierEditor::DrawInWindow()
     }
 }
 
+// FusionFix's extended-timecycle code resolves the game's blend functions by
+// reading the E8 call sites after this editor has repatched them, then calls
+// these hooks with a frame they were not written for. Validate rather than
+// dereference: forwarding garbage to the original crashes one frame deeper.
+
 void __fastcall TimecycModifierEditor::BlendColorSetWithModifierH1(TimeCycle::CColourSet* pthis, void* edx, TimeCycle::CTimeCycleModifier* modifier, float weight, bool a4)
 {
+    if(!IsReadable(modifier, sizeof(TimeCycle::CTimeCycleModifier)) || !IsReadable(pthis, 4))
+    {
+        return;
+    }
     msActiveExteriorModifiers[modifier->m_Hash] = weight;
 
     if(msLockModifier)
@@ -485,6 +499,10 @@ void __fastcall TimecycModifierEditor::BlendColorSetWithModifierH1(TimeCycle::CC
 
 void __fastcall TimecycModifierEditor::BlendColorSetWithModifierH2(TimeCycle::CColourSet* pthis, void* edx, TimeCycle::CTimeCycleModifier* modifier, float weight, bool a4)
 {
+    if(!IsReadable(pthis, 4) || (!msLockModifier && !IsReadable(modifier, sizeof(TimeCycle::CTimeCycleModifier))))
+    {
+        return;
+    }
     for(auto& activeExteriorMods : msActiveExteriorModifiers)
     {
         float globalExteriorWeight = 1.0f - weight;
@@ -502,6 +520,10 @@ void __fastcall TimecycModifierEditor::BlendColorSetWithModifierH2(TimeCycle::CC
 
 void __fastcall TimecycModifierEditor::BlendTimeCycleModifiersH1(TimeCycle::CTimeCycleModifier* pthis, void* edx, TimeCycle::CTimeCycleModifier* that, float weight)
 {
+    if(!IsReadable(that, sizeof(TimeCycle::CTimeCycleModifier)) || !IsReadable(pthis, 8))
+    {
+        return;
+    }
     msActiveInteriorModifiers[that->m_Hash].first = std::max(msActiveInteriorModifiers[that->m_Hash].first, weight);
     pthis->m_Hash = that->m_Hash;
 
@@ -513,6 +535,10 @@ void __fastcall TimecycModifierEditor::BlendTimeCycleModifiersH1(TimeCycle::CTim
 
 void __fastcall TimecycModifierEditor::BlendTimeCycleModifiersH2(TimeCycle::CTimeCycleModifier* pthis, void* edx, TimeCycle::CTimeCycleModifier* that, float weight)
 {
+    if(!IsReadable(that, sizeof(TimeCycle::CTimeCycleModifier)) || !IsReadable(pthis, 8))
+    {
+        return;
+    }
     float currWeightMul = msActiveInteriorModifiers[that->m_Hash].second;
     msActiveInteriorModifiers[that->m_Hash].second = std::max(currWeightMul, weight);
 
