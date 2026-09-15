@@ -48,6 +48,7 @@ private:
 
     int32_t TimecycTimeIndexToGameTime(const int32_t timeIndex);
     int32_t GameTimeToTimecycTimeIndex(const int32_t gameTime);
+    const char* GetTimeCyclePathForCurrentEpisode();
 
     int32_t (__cdecl* ForceWeather)(uint32_t) = nullptr;
     void (__cdecl *ReleaseWeather)() = nullptr;
@@ -56,6 +57,7 @@ private:
 
     bool mDisableMouseControl = false;
 
+    uint32_t* mCurrentEpisode = nullptr;
     int32_t *mHours = nullptr;
     int32_t *mMinutes = nullptr;
     uint32_t *mTimerLength = nullptr;

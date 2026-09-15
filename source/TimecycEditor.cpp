@@ -24,7 +24,8 @@ static const char* WATER_COLOR_ID             = "##WATER_COLOR";
 
 void TimecycEditor::Initialize()
 {
-    auto pattern = FindPattern({"81 C1 ? ? ? ? 52 51",  "? 05 ? ? ? ? 89 0D ? ? ? ? 50"});
+    auto pattern = FindPattern({"81 C1 ? ? ? ? 52 51",
+                                "? 05 ? ? ? ? 89 0D ? ? ? ? 50"});
     if(pattern.empty()) { gEditorDead = true; return; }
     *(uint32_t*)&TimeCycle::m_ColourSets = *(uint32_t*)pattern.get_first(2);
     
@@ -34,7 +35,8 @@ void TimecycEditor::Initialize()
     pattern = hook::pattern("3B 1D ? ? ? ? 7D ? 6A");
     mMinutes = *(int32_t**)pattern.get_first(2);
 
-    pattern = FindPattern({"8B 15 ? ? ? ? 56 8B F1 2B F0",  "8B 3D ? ? ? ? 2B C1 3B C7 7E"});
+    pattern = FindPattern({"8B 15 ? ? ? ? 56 8B F1 2B F0",
+                           "8B 3D ? ? ? ? 2B C1 3B C7 7E"});
     mTimerLength = *(uint32_t**)pattern.get_first(2);
 
     pattern = hook::pattern("8B 44 24 ? 39 05 ? ? ? ? 75");
@@ -42,7 +44,8 @@ void TimecycEditor::Initialize()
         pattern = hook::pattern("8B 4C 24 ? 39 0D ? ? ? ? 75");
     ForceWeather = (decltype(ForceWeather))pattern.get_first(0);
 
-    pattern = FindPattern({"E8 ? ? ? ? 8B 44 24 ? 39 05",  "E8 ? ? ? ? 8B 4C 24 ? 8B 74 24 ? 39 0D"});
+    pattern = FindPattern({"E8 ? ? ? ? 8B 44 24 ? 39 05",
+                           "E8 ? ? ? ? 8B 4C 24 ? 8B 74 24 ? 39 0D"});
     ReleaseWeather = injector::GetBranchDestination(pattern.get_first(0)).get();
 
     auto searchStringPattern = [](const char* str)
@@ -97,11 +100,16 @@ void TimecycEditor::Initialize()
     }
     SetTimeOneDayBack = *(decltype(SetTimeOneDayBack)*)pattern.get_first(1);
 
+    pattern = FindPattern({"39 3D ? ? ? ? 89 3D ? ? ? ? 89 3D", 
+                           "39 3D ? ? ? ? 89 3D ? ? ? ? 75",
+                           "? A1 ? ? ? ? 89 35 ? ? ? ? 3B C6"});
+    mCurrentEpisode = *(uint32_t**)pattern.get_first(2);
+
     TimecycModifierEditor::Init();
     if(gEditorDead) return;
 
     LoadSettings();
-    TimeCycle::Load("pc/data/timecyc.dat", nullptr, 0);
+    TimeCycle::Load(GetTimeCyclePathForCurrentEpisode(), nullptr, 0);
     ReSetFloatColors();
 
     mTimecycParamNameOffsetAndType[0] = {"Ambient Color 0", 0x0, TIMECYCPARAMTYPE_COLOR_U32};
@@ -577,9 +585,11 @@ void TimecycEditor::DrawMainWindow()
     {
         if(ImGui::BeginMenu("Load"))
         {
-            if(ImGui::MenuItem("timecyc.dat##Load"))
+            char label[64]{};
+            sprintf(label, "%s##Load", GetTimeCyclePathForCurrentEpisode());
+            if(ImGui::MenuItem(label))
             {
-                TimeCycle::Load("pc/data/timecyc.dat", nullptr, 0);
+                TimeCycle::Load(GetTimeCyclePathForCurrentEpisode(), nullptr, 0);
                 ReSetFloatColors();
             }
 
@@ -598,9 +608,11 @@ void TimecycEditor::DrawMainWindow()
 
         if(ImGui::BeginMenu("Save"))
         {
-            if(ImGui::MenuItem("timecyc.dat##Save"))
+            char label[64]{};
+            sprintf(label, "%s##Save", GetTimeCyclePathForCurrentEpisode());
+            if(ImGui::MenuItem(label))
             {
-                TimeCycle::Save("pc/data/timecyc.dat", nullptr, 0);
+                TimeCycle::Save(GetTimeCyclePathForCurrentEpisode(), nullptr, 0);
             }
 
             if(ImGui::MenuItem("Save As"))
@@ -1592,4 +1604,11 @@ int32_t TimecycEditor::GameTimeToTimecycTimeIndex(const int32_t gameTime)
     const int32_t gameTimeToTimecycTimeIndex[24] = {0, 0, 0, 0, 0, 1, 2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 7, 8, 9, 10, 10};
 
     return gameTimeToTimecycTimeIndex[gameTime];
+}
+
+const char* TimecycEditor::GetTimeCyclePathForCurrentEpisode()
+{
+    static const char timecyclePathsPerEpisode[3][32] = {"pc/data/timecyc.dat", "TLAD/pc/data/timecyc.dat", "TBoGT/pc/data/timecyc.dat"};
+    
+    return timecyclePathsPerEpisode[*mCurrentEpisode];
 }
