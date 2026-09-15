@@ -6,6 +6,7 @@
 #include "Common.h"
 
 #include "imgui/backends/imgui_impl_win32.h"
+#include "imgui_dx9_backend/imgui_impl_dx9_shader.h"
 
 #include <d3d9.h>
 #include <fstream>
@@ -224,11 +225,16 @@ void TimecycEditor::ReCreateFont()
     ImGui_ImplDX9_CreateDeviceObjects();
 }
 
-void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
+void TimecycEditor::InitializeImGui(IDirect3DDevice9* d3d9Device)
 {
+    // "d3d9Device" here is a pointer to a wrapper around the real IDIrect3DDevice, which is actually at offset 0x11AC.
+    // this fixes a conflict with IVSDK.Net which I couldn't find a better solution for.
+    d3d9Device = *(LPDIRECT3DDEVICE9*)((int)d3d9Device + 0x11AC);
+
     if(!mIsImGuiInitialized)
     {
         D3DDEVICE_CREATION_PARAMETERS creationParams;
+        ZeroMemory(&creationParams, sizeof(D3DDEVICE_CREATION_PARAMETERS));
         d3d9Device->GetCreationParameters(&creationParams);
 
         IMGUI_CHECKVERSION();
@@ -323,6 +329,9 @@ void TimecycEditor::InitializeImGui(IDirect3DDevice9 *d3d9Device)
         ImGui_ImplDX9_Init(d3d9Device);
 
         ReCreateFont();
+
+        mImGuiTexQueue.UpdateTexFunc = ImGui_ImplDX9_UpdateTexture;
+        mImGuiTexQueue.InFlightFrames = 2;
 
         mIsImGuiInitialized = true;
     }
@@ -495,6 +504,10 @@ void TimecycEditor::Update()
         *mTimerLength = LOCKED_MILLISECONDS_PER_GAME_MINUTE;
     }
 
+    mImGuiTexQueueMutex.lock();
+    mImGuiTexQueue.PreNewFrame();
+    mImGuiTexQueueMutex.unlock();
+
     ImGui_ImplDX9_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -512,9 +525,18 @@ void TimecycEditor::Update()
 
     ImGui::EndFrame();
     ImGui::Render();
+
+    ImDrawData* drawData = ImGui::GetDrawData();
+    mImGuiTexQueueMutex.lock();
+    mImGuiTexQueue.QueueRequests(drawData);
+    mImGuiTexQueueMutex.unlock();
+
+    mCurrentImGuiSnapshot = &mImGuiSnapshots[mImGuiSnapshotIndex % 2];
+    mCurrentImGuiSnapshot->SnapUsingSwap(drawData, ImGui::GetTime());
+    mImGuiSnapshotIndex++;
 }
 
-void TimecycEditor::OnBeforeD3D9DeviceReset(IDirect3DDevice9 *d3d9Device)
+void TimecycEditor::OnBeforeD3D9DeviceReset(IDirect3DDevice9* d3d9Device)
 {
     InitializeImGui(d3d9Device);
 
@@ -526,15 +548,18 @@ void TimecycEditor::OnAfterD3D9DeviceReset()
     ImGui_ImplDX9_CreateDeviceObjects();
 }
 
-void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9 *d3d9Device)
+void TimecycEditor::OnBeforeD3D9DeviceEndScene(IDirect3DDevice9* d3d9Device)
 {
-    ImDrawData* drawData = ImGui::GetDrawData();
-    if(!drawData)
-        return;
-
     InitializeImGui(d3d9Device);
 
-    ImGui_ImplDX9_RenderDrawDataFF(drawData);
+    if(!mCurrentImGuiSnapshot)
+        return;
+
+    mImGuiTexQueueMutex.lock();
+    mImGuiTexQueue.ProcessRequests(&mCurrentImGuiSnapshot->DrawData);
+    mImGuiTexQueueMutex.unlock();
+
+    ImGui_ImplDX9_RenderDrawData(&mCurrentImGuiSnapshot->DrawData);
 }
 
 void TimecycEditor::DrawMainWindow()

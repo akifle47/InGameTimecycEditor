@@ -3,14 +3,17 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "TimeCycle.h"
-#include "imgui_dx9_backend/imgui_impl_dx9_shader.h"
+#include "imgui_club/imgui_threaded_rendering/imgui_threaded_rendering.h"
 
 #include <tuple>
 #include <string>
 #include <array>
+#include <mutex>
 #include <Windows.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+struct IDirect3DDevice9;
 
 class TimecycEditor
 {
@@ -93,6 +96,12 @@ private:
     };
 
     std::array<std::tuple<std::string, uint32_t, TIMECYC_PARAM_TYPE>, 80> mTimecycParamNameOffsetAndType;
+
+    uint32_t            mImGuiSnapshotIndex = 0;
+    ImDrawDataSnapshot* mCurrentImGuiSnapshot = nullptr;
+    ImDrawDataSnapshot  mImGuiSnapshots[2];
+    ImTextureQueue      mImGuiTexQueue;
+    std::mutex          mImGuiTexQueueMutex;
 
     static constexpr uint32_t DEFAULT_MILLISECONDS_PER_GAME_MINUTE = 2000;
     static constexpr uint32_t LOCKED_MILLISECONDS_PER_GAME_MINUTE  = 30000;
